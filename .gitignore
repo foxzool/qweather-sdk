@@ -1,0 +1,7 @@
+/target
+/.idea
+.env
+/tmp
+crates/*/target
+**/*.rs.bk
+Cargo.lock
