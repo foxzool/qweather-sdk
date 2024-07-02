@@ -1,6 +1,6 @@
-use std::env;
 use dotenvy::dotenv;
 use qweather_sdk::client::QWeatherClient;
+use std::env;
 
 #[tokio::main]
 async fn main() {

@@ -11,9 +11,8 @@ pub static WEATHER_API_URL: &str = "https://api.qweather.com";
 /// 免费订阅 API URL
 pub static WEATHER_DEV_API_URL: &str = "https://devapi.qweather.com";
 
+pub mod api;
 pub mod client;
 pub mod model;
-pub mod api;
-
 
 pub type SDKResult<T> = Result<T, reqwest::Error>;

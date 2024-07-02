@@ -158,10 +158,7 @@ pub struct DailyForecast {
     /// 云量，百分比数值。可能为空
     #[serde(deserialize_with = "deserialize_option_number_from_string")]
     pub cloud: Option<f32>,
-
 }
-
-
 
 /// 逐小时天气预报
 #[derive(Deserialize, Serialize, Debug)]

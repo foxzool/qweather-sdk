@@ -3,8 +3,13 @@
 ## Example
 
 ```rust
+use dotenvy::dotenv;
+use qweather_sdk::client::QWeatherClient;
+use std::env;
+
 #[tokio::main]
 async fn main() {
+    dotenv().expect(".env file not found");
     env_logger::init();
     let key = env::var("QWEATHER_KEY").unwrap();
 
@@ -12,11 +17,12 @@ async fn main() {
     let weather_now = client.weather_now("101010100").await.unwrap();
     println!("{:#?}", weather_now.data);
 }
+
 ```
 
 ## 已完成的API
 
-### 城市天气`
+- 城市天气
     - [x] 实时天气
     - [x] 每日天气预报
     - [x] 逐小时天气预报
