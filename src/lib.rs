@@ -1,3 +1,7 @@
+#![doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/README.md"))]
+#![allow(rustdoc::invalid_html_tags)]
+#![allow(rustdoc::broken_intra_doc_links)]
+
 /// GEO API URL
 pub static GEO_API_URL: &str = "https://geoapi.qweather.com";
 
@@ -10,6 +14,6 @@ pub static WEATHER_DEV_API_URL: &str = "https://devapi.qweather.com";
 pub mod client;
 pub mod model;
 pub mod api;
-pub mod error;
 
-pub type SDKResult<T> = Result<T, error::QWeatherError>;
+
+pub type SDKResult<T> = Result<T, reqwest::Error>;
