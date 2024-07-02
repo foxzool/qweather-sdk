@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::{DateTime, FixedOffset, NaiveDate};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::{deserialize_number_from_string, deserialize_option_number_from_string};
 
@@ -9,7 +9,7 @@ pub struct ApiResponse<T> {
     pub code: String,
     ///  当前[API的最近更新时间](https://dev.qweather.com/docs/resource/glossary/#update-time)
     #[serde(deserialize_with = "decode_datetime")]
-    pub update_time: NaiveDateTime,
+    pub update_time: DateTime<FixedOffset>,
     /// 当前数据的响应式页面，便于嵌入网站或应用
     pub fx_link: String,
     #[serde(flatten)]
@@ -31,12 +31,12 @@ pub enum DataType {
     HourlyForecast { hourly: Vec<HourlyForecast> },
 }
 
-fn decode_datetime<'de, D>(deserializer: D) -> Result<NaiveDateTime, D::Error>
+fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    let dt = NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
+    let dt = DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
     Ok(dt)
 }
 
@@ -46,7 +46,7 @@ where
 pub struct Now {
     /// 数据观测时间
     #[serde(deserialize_with = "decode_datetime")]
-    pub obs_time: NaiveDateTime,
+    pub obs_time: DateTime<FixedOffset>,
     /// 温度，默认单位：摄氏度
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub temp: f32,
@@ -166,7 +166,7 @@ pub struct DailyForecast {
 pub struct HourlyForecast {
     /// 预报时间
     #[serde(deserialize_with = "decode_datetime")]
-    pub fx_time: NaiveDateTime,
+    pub fx_time: DateTime<FixedOffset>,
     /// 温度，默认单位：摄氏度
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub temp: f32,
