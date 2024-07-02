@@ -10,6 +10,20 @@ keywords = ["sdk", "qweather", "rest"]
 categories = ["api-bindings"]
 
 [dependencies]
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "multipart"] }
+reqwest = { version = "0.12", features = ["json", "gzip"] }
+tokio = { version = "1.0", default-features = false, features = ["net", "time"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde-aux = "4.5.0"
+url = "2.5.2"
+chrono = { version = "0.4.38", features = ["serde"] }
+thiserror = "1.0.61"
+env_logger = "0.11.3"
+log = "0.4.22"
+
+[dev-dependencies]
+tokio = { version = "1.0", default-features = false, features = ["macros", "rt-multi-thread"] }
+
+[[example]]
+name = "weather_now"
+path = "examples/weather_now.rs"
