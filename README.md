@@ -2,7 +2,7 @@
 
 ## Example
 
-```rust
+```no_run
 use dotenvy::dotenv;
 use qweather_sdk::client::QWeatherClient;
 use std::env;

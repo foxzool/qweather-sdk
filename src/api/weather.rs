@@ -17,13 +17,12 @@ impl QWeatherClient {
 
         debug!("request weather_now {}", url);
 
-        Ok(self
-            .client
+        self.client
             .get(url)
             .send()
             .await?
             .json::<ApiResponse<DataType>>()
-            .await?)
+            .await
     }
 
     /// 每日天气预报
@@ -42,13 +41,12 @@ impl QWeatherClient {
 
         debug!("request weather_daily_forecast {}", url);
 
-        Ok(self
-            .client
+        self.client
             .get(url)
             .send()
             .await?
             .json::<ApiResponse<DataType>>()
-            .await?)
+            .await
     }
 
     /// 逐小时天气预报
@@ -67,12 +65,11 @@ impl QWeatherClient {
 
         debug!("request weather_hourly_forecast {}", url);
 
-        Ok(self
-            .client
+        self.client
             .get(url)
             .send()
             .await?
             .json::<ApiResponse<DataType>>()
-            .await?)
+            .await
     }
 }
