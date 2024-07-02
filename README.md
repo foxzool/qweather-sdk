@@ -1,3 +1,9 @@
+[![crates.io](https://img.shields.io/crates/v/qweather-sdk)](https://crates.io/crates/qweather-sdk)
+[![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/Seldom-SE/seldom_pixel#license)
+[![crates.io](https://img.shields.io/crates/d/qweather-sdk)](https://crates.io/crates/qweather-sdk)
+[![CI](https://github.com/foxzool/qweather-sdk/workflows/CI/badge.svg)](https://github.com/foxzool/qweather-sdk/actions)
+[![Documentation](https://docs.rs/qweather-sdk/badge.svg)](https://docs.rs/qweather-sdk)
+
 # 和风天气SDK
 
 ## Example

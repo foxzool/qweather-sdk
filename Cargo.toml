@@ -7,6 +7,9 @@ authors = ["ZoOL <zhooul@gmail.com>"]
 readme = "README.md"
 description = "Client SDK to use QWeather API"
 keywords = ["sdk", "qweather", "rest"]
+documentation = "https://docs.rs/qweather-sdk"
+repository = "https://github.com/foxzool/qweather-sdk"
+homepage = "https://github.com/foxzool/qweather-sdk"
 categories = ["api-bindings"]
 
 [dependencies]
