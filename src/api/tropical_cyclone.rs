@@ -1,8 +1,12 @@
-use serde_aux::prelude::*;
-use crate::api::{decode_datetime, Refer};
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
-use crate::client::QWeatherClient;
+use serde_aux::prelude::*;
+
+use crate::{
+    api::{decode_datetime, deserialize_option_number_from_empty_string, Refer},
+    client::QWeatherClient,
+    APIResult,
+};
 
 impl QWeatherClient {
     /// 台风预报
@@ -12,23 +16,14 @@ impl QWeatherClient {
     /// # 参数
     ///
     /// * storm_id : 需要查询的台风ID，StormID可通过台风查询API获取。例如 stormid=NP2018
-    pub async fn storm_forecast(
-        &self,
-        storm_id: &str,
-    ) -> crate::SDKResult<StormForecastResponse> {
+    pub async fn storm_forecast(&self, storm_id: &str) -> APIResult<StormForecastResponse> {
         let url = "https://api.qweather.com/v7/tropical/storm-forecast".to_string();
-        let mut url = url::Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut()
-            .append_pair("stormid", storm_id);
+        let mut params = self.base_params.clone();
+        params.insert("stormid".to_string(), storm_id.to_string());
 
-        log::debug!("request storm_forecast {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
-
 }
-
 
 /// 台风预报返回值
 #[derive(Deserialize, Serialize, Debug)]
@@ -46,7 +41,6 @@ pub struct StormForecastResponse {
     /// 数据来源
     pub refer: Refer,
 }
-
 
 /// 台风预报
 #[derive(Deserialize, Serialize, Debug)]
@@ -70,13 +64,12 @@ pub struct StormForecast {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub wind_speed: f64,
     /// 台风移动速度
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub move_speed: Option<f64>,
     /// 台风移动方位
     pub move_dir: String,
     /// 台风移动方位360度方向
     pub move_360: String,
-
 }
 
 #[test]
@@ -174,16 +167,16 @@ fn test_store_forecast() {
   }
 }"#;
 
-        let resp: StormForecastResponse = serde_json::from_str(json_data).unwrap();
-        assert_eq!(resp.code, "200");
-        assert_eq!(resp.forecast.len(), 7);
-        assert_eq!(resp.forecast[0].type_, "TS");
-        assert_eq!(resp.forecast[0].pressure, 990.0);
-        assert_eq!(resp.forecast[0].wind_speed, 18.0);
-        assert_eq!(resp.forecast[0].lat, 31.7);
-        assert_eq!(resp.forecast[0].lon, 118.4);
-        assert_eq!(resp.update_time.to_rfc3339(), "2021-07-27T03:00:00+00:00");
-        assert_eq!(resp.fx_link, "https://www.qweather.com");
-        assert_eq!(resp.refer.sources[0], "NMC");
-        assert_eq!(resp.refer.license[0], "QWeather Developers License");
+    let resp: StormForecastResponse = serde_json::from_str(json_data).unwrap();
+    assert_eq!(resp.code, "200");
+    assert_eq!(resp.forecast.len(), 7);
+    assert_eq!(resp.forecast[0].type_, "TS");
+    assert_eq!(resp.forecast[0].pressure, 990.0);
+    assert_eq!(resp.forecast[0].wind_speed, 18.0);
+    assert_eq!(resp.forecast[0].lat, 31.7);
+    assert_eq!(resp.forecast[0].lon, 118.4);
+    assert_eq!(resp.update_time.to_rfc3339(), "2021-07-27T03:00:00+00:00");
+    assert_eq!(resp.fx_link, "https://www.qweather.com");
+    assert_eq!(resp.refer.sources[0], "NMC");
+    assert_eq!(resp.refer.license[0], "QWeather Developers License");
 }

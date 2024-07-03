@@ -1,12 +1,11 @@
 use chrono::{DateTime, FixedOffset};
-use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
-use url::Url;
 
 use crate::{
     api::{decode_datetime, Refer},
     client::QWeatherClient,
+    APIResult,
 };
 
 impl QWeatherClient {
@@ -22,15 +21,12 @@ impl QWeatherClient {
     pub async fn minutely_precipitation(
         &self,
         location: &str,
-    ) -> Result<MinutePrecipitationResponse, reqwest::Error> {
+    ) -> APIResult<MinutePrecipitationResponse> {
         let url = format!("{}/v7/minutely/5m", self.base_url);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        debug!("request minutely_precipitation {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 

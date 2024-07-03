@@ -1,12 +1,11 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
-use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
-use url::Url;
 
 use crate::{
-    api::{decode_datetime, Refer},
+    api::{decode_datetime, deserialize_option_number_from_empty_string, Refer},
     client::QWeatherClient,
+    APIResult,
 };
 
 impl QWeatherClient {
@@ -19,18 +18,13 @@ impl QWeatherClient {
     ///
     /// * location (必选)需要查询地区的以英文逗号分隔的经度,纬度坐标（十进制，
     ///   最多支持小数点后两位）。例如 location=116.41,39.92
-    pub async fn grid_weather_now(
-        &self,
-        location: &str,
-    ) -> Result<GridWeatherNowResponse, reqwest::Error> {
+    pub async fn grid_weather_now(&self, location: &str) -> APIResult<GridWeatherNowResponse> {
         let url = format!("{}/v7/grid-weather/now", self.base_url);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
 
-        debug!("request grid_weather_now {}", url);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// 格点每日天气预报
@@ -48,15 +42,12 @@ impl QWeatherClient {
         &self,
         location: &str,
         day: i32,
-    ) -> Result<GridWeatherDailyForecastResponse, reqwest::Error> {
+    ) -> APIResult<GridWeatherDailyForecastResponse> {
         let url = format!("{}/v7/grid-weather/{}d", self.base_url, day);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        debug!("request grid_weather_daily_forecast {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// 格点逐小时天气预报
@@ -74,22 +65,18 @@ impl QWeatherClient {
         &self,
         location: &str,
         hour: i32,
-    ) -> Result<GridWeatherHourlyForecastResponse, reqwest::Error> {
+    ) -> APIResult<GridWeatherHourlyForecastResponse> {
         let url = format!("{}/v7/grid-weather/{}h", self.base_url, hour);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        debug!("request grid_weather_hourly_forecast {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 
 /// 格点实时天气返回值
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-#[serde(tag = "now")]
 pub struct GridWeatherNow {
     /// 数据观测时间
     #[serde(deserialize_with = "decode_datetime")]
@@ -122,10 +109,10 @@ pub struct GridWeatherNow {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub pressure: f32,
     /// 云量，百分比数值。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub cloud: Option<f32>,
     /// 露点温度。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub dew: Option<f32>,
 }
 
@@ -259,10 +246,10 @@ pub struct GridWeatherHourlyForecast {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub pressure: f32,
     /// 云量，百分比数值。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub cloud: Option<f32>,
     /// 露点温度。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub dew: Option<f32>,
 }
 

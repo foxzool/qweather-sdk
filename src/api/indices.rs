@@ -1,13 +1,11 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
-use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
-use url::Url;
 
 use crate::{
     api::{decode_datetime, Refer},
     client::QWeatherClient,
-    SDKResult,
+    APIResult,
 };
 
 impl QWeatherClient {
@@ -29,17 +27,14 @@ impl QWeatherClient {
         location: &str,
         type_: &str,
         day: i32,
-    ) -> SDKResult<IndicesForecastResponse> {
+    ) -> APIResult<IndicesForecastResponse> {
         let url = format!("{}/v7/indices/{}d", self.base_url, day);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut()
-            .append_pair("location", location)
-            .append_pair("type", type_);
 
-        debug!("request indices_forecast {}", url);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
+        params.insert("type".to_string(), type_.to_string());
 
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 

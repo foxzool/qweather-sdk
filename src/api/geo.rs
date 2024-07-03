@@ -1,9 +1,7 @@
-use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from_string};
-use url::Url;
 
-use crate::{api::Refer, client::QWeatherClient, GEO_API_URL};
+use crate::{api::Refer, client::QWeatherClient, APIResult, GEO_API_URL};
 
 impl QWeatherClient {
     /// 城市搜索
@@ -40,25 +38,23 @@ impl QWeatherClient {
         adm: Option<&str>,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<CityLookupResponse, reqwest::Error> {
+    ) -> APIResult<CityLookupResponse> {
         let url = format!("{}/v2/city/lookup", GEO_API_URL);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
+
         if let Some(adm) = adm {
-            url.query_pairs_mut().append_pair("adm", adm);
+            params.insert("adm".to_string(), adm.to_string());
         }
         if let Some(range) = range {
-            url.query_pairs_mut().append_pair("range", range);
+            params.insert("range".to_string(), range.to_string());
         }
         if let Some(number) = number {
-            url.query_pairs_mut()
-                .append_pair("number", &number.to_string());
+            params.insert("number".to_string(), number.to_string());
         }
 
-        debug!("request city_lookup {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// 热门城市查询
@@ -75,21 +71,19 @@ impl QWeatherClient {
         &self,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<TopCityResponse, reqwest::Error> {
+    ) -> APIResult<TopCityResponse> {
         let url = format!("{}/v2/city/top", GEO_API_URL);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
+
+        let mut params = self.base_params.clone();
+
         if let Some(range) = range {
-            url.query_pairs_mut().append_pair("range", range);
+            params.insert("range".to_string(), range.to_string());
         }
         if let Some(number) = number {
-            url.query_pairs_mut()
-                .append_pair("number", &number.to_string());
+            params.insert("number".to_string(), number.to_string());
         }
 
-        debug!("request geo_city_top {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// POI搜索
@@ -117,23 +111,20 @@ impl QWeatherClient {
         type_: &str,
         city: Option<&str>,
         number: Option<u32>,
-    ) -> Result<POIResponse, reqwest::Error> {
+    ) -> APIResult<POIResponse> {
         let url = format!("{}/v2/poi/lookup", GEO_API_URL);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
-        url.query_pairs_mut().append_pair("type", type_);
+
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
+        params.insert("type".to_string(), type_.to_string());
         if let Some(city) = city {
-            url.query_pairs_mut().append_pair("city", city);
+            params.insert("city".to_string(), city.to_string());
         }
         if let Some(number) = number {
-            url.query_pairs_mut()
-                .append_pair("number", &number.to_string());
+            params.insert("number".to_string(), number.to_string());
         }
 
-        debug!("request geo_poi_lookup {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// POI范围搜索
@@ -160,24 +151,20 @@ impl QWeatherClient {
         type_: &str,
         radius: Option<f32>,
         number: Option<u32>,
-    ) -> Result<POIResponse, reqwest::Error> {
+    ) -> APIResult<POIResponse> {
         let url = format!("{}/v2/poi/range", GEO_API_URL);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
-        url.query_pairs_mut().append_pair("type", type_);
+
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
+        params.insert("type".to_string(), type_.to_string());
         if let Some(radius) = radius {
-            url.query_pairs_mut()
-                .append_pair("radius", &radius.to_string());
+            params.insert("radius".to_string(), radius.to_string());
         }
         if let Some(number) = number {
-            url.query_pairs_mut()
-                .append_pair("number", &number.to_string());
+            params.insert("number".to_string(), number.to_string());
         }
 
-        debug!("request geo_poi_range {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 

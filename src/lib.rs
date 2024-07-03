@@ -3,6 +3,8 @@
 #![allow(rustdoc::broken_intra_doc_links)]
 extern crate core;
 
+use crate::api::APIResponse;
+
 /// GEO API URL
 pub static GEO_API_URL: &str = "https://geoapi.qweather.com";
 
@@ -15,4 +17,4 @@ pub static WEATHER_DEV_API_URL: &str = "https://devapi.qweather.com";
 pub mod api;
 pub mod client;
 
-pub type SDKResult<T> = Result<T, reqwest::Error>;
+pub type APIResult<T> = Result<APIResponse<T>, reqwest::Error>;

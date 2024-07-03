@@ -1,13 +1,11 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
-use log::debug;
 use serde::{Deserialize, Serialize};
-use serde_aux::prelude::{deserialize_number_from_string, deserialize_option_number_from_string};
-use url::Url;
+use serde_aux::prelude::deserialize_number_from_string;
 
 use crate::{
-    api::{decode_datetime, Refer},
+    api::{decode_datetime, deserialize_option_number_from_empty_string, Refer},
     client::QWeatherClient,
-    SDKResult,
+    APIResult,
 };
 
 impl QWeatherClient {
@@ -21,15 +19,12 @@ impl QWeatherClient {
     /// * location(必选)需要查询地区的LocationID或以英文逗号分隔的经度,纬度坐标（十进制，
     ///   最多支持小数点后两位），LocationID可通过GeoAPI获取。例如 location=101010100 或
     ///   location=116.41,39.92
-    pub async fn weather_now(&self, location: &str) -> SDKResult<WeatherNowResponse> {
+    pub async fn weather_now(&self, location: &str) -> APIResult<WeatherNowResponse> {
         let url = format!("{}/v7/weather/now", self.base_url);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        debug!("request weather_now {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// 每日天气预报
@@ -49,18 +44,15 @@ impl QWeatherClient {
         &self,
         location: &str,
         day: u8,
-    ) -> SDKResult<WeatherDailyForecastResponse> {
+    ) -> APIResult<WeatherDailyForecastResponse> {
         if ![3u8, 7, 10, 15, 30].contains(&day) {
             panic!("invalid day")
         }
         let url = format!("{}/v7/weather/{}d", self.base_url, day);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        debug!("request weather_daily_forecast {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// 逐小时天气预报
@@ -79,18 +71,15 @@ impl QWeatherClient {
         &self,
         location: &str,
         hour: u8,
-    ) -> SDKResult<WeatherHourlyForecastResponse> {
+    ) -> APIResult<WeatherHourlyForecastResponse> {
         if ![24u8, 72, 168].contains(&hour) {
             panic!("invalid hour")
         }
         let url = format!("{}/v7/weather/{}h", self.base_url, hour);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        debug!("request weather_hourly_forecast {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 
@@ -135,10 +124,10 @@ pub struct WeatherNow {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub vis: f32,
     /// 云量，百分比数值。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub cloud: Option<f32>,
     /// 露点温度。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub dew: Option<f32>,
 }
 
@@ -227,7 +216,7 @@ pub struct DailyForecast {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub vis: f32,
     /// 云量，百分比数值。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub cloud: Option<f32>,
 }
 
@@ -282,10 +271,10 @@ pub struct HourlyForecast {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub pressure: f32,
     /// 云量，百分比数值。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub cloud: Option<f32>,
     /// 露点温度。可能为空
-    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(deserialize_with = "deserialize_option_number_from_empty_string")]
     pub dew: Option<f32>,
 }
 
@@ -342,7 +331,44 @@ fn test_weather_now() {
 }"#;
 
     let resp = serde_json::from_str::<WeatherNowResponse>(json_data).unwrap();
-    assert_eq!(resp.now.temp, 24.0)
+    assert_eq!(resp.code, "200");
+
+    let json_data = serde_json::json!(
+          {
+            "code": "200",
+            "updateTime": "2024-07-03T18:26+08:00",
+            "fxLink": "https://www.qweather.com/weather/beijing-101010100.html",
+            "now": {
+            "obsTime": "2024-07-03T18:24+08:00",
+            "temp": "27",
+            "feelsLike": "28",
+            "icon": "101",
+            "text": "多云",
+            "wind360": "297",
+            "windDir": "西北风",
+            "windScale": "1",
+            "windSpeed": "4",
+            "humidity": "51",
+            "precip": "0.0",
+            "pressure": "1001",
+            "vis": "17",
+            "cloud": "",
+            "dew": ""
+            },
+            "refer": {
+            "sources": [
+            "QWeather"
+            ],
+            "license": [
+            "CC BY-SA 4.0"
+            ]
+    }
+    }
+
+        );
+
+    let resp = serde_json::from_value::<WeatherNowResponse>(json_data).unwrap();
+    assert_eq!(resp.code, "200");
 }
 
 #[test]

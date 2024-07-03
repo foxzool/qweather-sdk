@@ -1,12 +1,10 @@
 use chrono::{DateTime, FixedOffset};
-use log::debug;
 use serde::{Deserialize, Serialize};
-use url::Url;
 
 use crate::{
     api::{decode_datetime, option_decode_datetime, Refer},
     client::QWeatherClient,
-    SDKResult,
+    APIResult,
 };
 
 impl QWeatherClient {
@@ -21,38 +19,36 @@ impl QWeatherClient {
     /// * location 需要查询地区的LocationID或以英文逗号分隔的经度,纬度坐标（十进制，
     ///   最多支持小数点后两位），LocationID可通过GeoAPI获取。例如 location=101010100 或
     ///   location=116.41,39.92
-    pub async fn weather_warning(&self, location: &str) -> SDKResult<WeatherWarningResponse> {
+    pub async fn weather_warning(&self, location: &str) -> APIResult<WeatherWarningResponse> {
         let url = format!("{}/v7/warning/now", self.base_url);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("location", location);
 
-        debug!("request weather_warning {}", url);
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
 
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 
     /// 天气预警城市列表
     ///
-    /// 获取指定国家或地区当前正在发生天气灾害预警的城市列表，根据这些城市列表再查询对应城市的天气灾害预警。
+    /// 获取指定国家或地区当前正在发生天气灾害预警的城市列表，
+    /// 根据这些城市列表再查询对应城市的天气灾害预警。
     ///
     ///
     /// # 参数
     ///
-    /// * range 选择指定的国家或地区，使用ISO 3166格式。例如range=cn或range=hk。目前该功能仅支持中国（包括港澳台）地区的城市列表，
+    /// * range 选择指定的国家或地区，使用ISO
+    ///   3166格式。例如range=cn或range=hk。目前该功能仅支持中国（包括港澳台）地区的城市列表，
     ///   其他国家和地区请使用请使用天气灾害预警单独获取
     pub async fn weather_warning_city_list(
         &self,
         range: &str,
-    ) -> SDKResult<WeatherWarningCityListResponse> {
+    ) -> APIResult<WeatherWarningCityListResponse> {
         let url = format!("{}/v7/warning/list", self.base_url);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        url.query_pairs_mut().append_pair("range", range);
 
-        debug!("request weather_warning {}", url);
+        let mut params = self.base_params.clone();
+        params.insert("range".to_string(), range.to_string());
 
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 

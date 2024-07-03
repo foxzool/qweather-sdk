@@ -1,10 +1,8 @@
 use chrono::{DateTime, FixedOffset};
-use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
-use url::Url;
 
-use crate::{api::decode_datetime, client::QWeatherClient, SDKResult};
+use crate::{api::decode_datetime, client::QWeatherClient, APIResult};
 
 impl QWeatherClient {
     /// 实时空气质量(beta)
@@ -20,27 +18,17 @@ impl QWeatherClient {
     pub async fn air_now(
         &self,
         location: &str,
-        pollutant: Option<bool>,
-        station: Option<bool>,
-    ) -> SDKResult<AirNowResponse> {
+        pollutant: bool,
+        station: bool,
+    ) -> APIResult<AirNowResponse> {
         let url = format!("{}/airquality/v1/now/{}", self.base_url, location);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
-        if let Some(pollutant) = pollutant {
-            url.query_pairs_mut()
-                .append_pair("pollutant", &pollutant.to_string());
-        }
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location.to_string());
+        params.insert("pollutant".to_string(), pollutant.to_string());
+        params.insert("station".to_string(), station.to_string());
 
-        if let Some(station) = station {
-            url.query_pairs_mut()
-                .append_pair("station", &station.to_string());
-        }
-
-        debug!("request air_quality_now {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
-
 
     /// 监测站数据(beta)
     ///
@@ -49,14 +37,12 @@ impl QWeatherClient {
     /// # 参数
     ///
     /// * location 空气质量监测站的LocationID，LocationID可通过GeoAPI获取。例如 P58911
-    pub async fn air_station(&self, location_id: &str) -> SDKResult<AirStationResponse> {
+    pub async fn air_station(&self, location_id: &str) -> APIResult<AirStationResponse> {
         let url = format!("{}/airquality/v1/station/{}", self.base_url, location_id);
-        let mut url = Url::parse(&url).unwrap();
-        url.set_query(Some(&self.query));
+        let mut params = self.base_params.clone();
+        params.insert("location".to_string(), location_id.to_string());
 
-        debug!("request air_station {}", url);
-
-        self.client.get(url).send().await?.json().await
+        self.request_api(url, params).await
     }
 }
 
@@ -422,7 +408,7 @@ fn test_air_quality() {
     assert_eq!(air_now.source.len(), 1);
     assert_eq!(air_now.aqi[0].code, "cn-mee-1h");
     assert_eq!(air_now.aqi[0].name, "AQI-1H (CN)");
-    assert_eq!(air_now.aqi[0].default_local_aqi, true);
+    assert!(air_now.aqi[0].default_local_aqi);
     assert_eq!(air_now.aqi[0].value, 37);
     assert_eq!(air_now.aqi[0].value_display, "37");
     assert_eq!(air_now.aqi[0].level, 1);
