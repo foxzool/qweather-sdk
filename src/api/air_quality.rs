@@ -1,4 +1,5 @@
 use chrono::{DateTime, FixedOffset};
+use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 use url::Url;
@@ -35,7 +36,25 @@ impl QWeatherClient {
                 .append_pair("station", &station.to_string());
         }
 
-        println!("request air_quality_now {}", url);
+        debug!("request air_quality_now {}", url);
+
+        self.client.get(url).send().await?.json().await
+    }
+
+
+    /// 监测站数据(beta)
+    ///
+    /// 全球空气质量监测站数据，提供各个国家或地区监测站的污染物浓度值。
+    ///
+    /// # 参数
+    ///
+    /// * location 空气质量监测站的LocationID，LocationID可通过GeoAPI获取。例如 P58911
+    pub async fn air_station(&self, location_id: &str) -> SDKResult<AirStationResponse> {
+        let url = format!("{}/airquality/v1/station/{}", self.base_url, location_id);
+        let mut url = Url::parse(&url).unwrap();
+        url.set_query(Some(&self.query));
+
+        debug!("request air_station {}", url);
 
         self.client.get(url).send().await?.json().await
     }
@@ -132,7 +151,7 @@ pub struct Pollutant {
     /// 污染物的浓度值
     pub concentration: Concentration,
     /// 污染物的分指数
-    pub sub_index: SubIndex,
+    pub sub_index: Option<SubIndex>,
 }
 
 /// 浓度值
@@ -140,6 +159,7 @@ pub struct Pollutant {
 #[serde(rename_all = "camelCase")]
 pub struct Concentration {
     /// 浓度值
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub value: f64,
     /// 浓度值的单位
     pub unit: String,
@@ -150,6 +170,7 @@ pub struct Concentration {
 #[serde(rename_all = "camelCase")]
 pub struct SubIndex {
     /// [污染物的分指数的数值](https://dev.qweather.com/docs/resource/air-info/#pollutant-sub-index)，可能为空
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub value: f64,
     /// 污染物的分指数数值的显示名称
     pub value_display: String,
@@ -163,6 +184,21 @@ pub struct Station {
     pub id: String,
     /// AQI相关联的监测站名称
     pub name: String,
+}
+
+/// 监测站数据返回值
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct AirStationResponse {
+    /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
+    pub code: String,
+    /// 当前[API的最近更新时间](https://dev.qweather.com/docs/resource/glossary/#update-time)
+    #[serde(deserialize_with = "decode_datetime")]
+    pub update_time: DateTime<FixedOffset>,
+    /// 污染物
+    pub pollutant: Vec<Pollutant>,
+    /// 数据来源
+    pub source: Vec<String>,
 }
 
 #[test]
@@ -414,4 +450,77 @@ fn test_air_quality() {
             .sensitive_population,
         "各类人群可正常活动。"
     );
+}
+
+#[test]
+fn test_air_station() {
+    let json_data = r#"{
+  "code": "200",
+  "updateTime": "2023-08-30T09:40+00:00",
+  "pollutant": [
+    {
+      "code": "pm2p5",
+      "name": "PM 2.5",
+      "fullName": "Fine particulate matter (<2.5µm)",
+      "concentration": {
+        "value": "19",
+        "unit": "μg/m3"
+      }
+    },
+    {
+      "code": "pm10",
+      "name": "PM 10",
+      "fullName": "Inhalable particulate matter (<10µm)",
+      "concentration": {
+        "value": "26",
+        "unit": "μg/m3"
+      }
+    },
+    {
+      "code": "no2",
+      "name": "NO2",
+      "fullName": "Nitrogen dioxide",
+      "concentration": {
+        "value": "12.3",
+        "unit": "ppb"
+      }
+    },
+    {
+      "code": "o3",
+      "name": "O3",
+      "fullName": "Ozone",
+      "concentration": {
+        "value": "30",
+        "unit": "ppb"
+      }
+    },
+    {
+      "code": "co",
+      "name": "CO",
+      "fullName": "Carbon monoxide",
+      "concentration": {
+        "value": "0.4",
+        "unit": "ppm"
+      }
+    }
+  ],
+  "source": [
+    "EPA"
+  ]
+}"#;
+
+    let air_station: AirStationResponse = serde_json::from_str(json_data).unwrap();
+    assert_eq!(air_station.code, "200");
+    assert_eq!(
+        air_station.update_time.to_string(),
+        "2023-08-30 09:40:00 +00:00"
+    );
+    let pollutant = air_station.pollutant;
+    assert_eq!(pollutant.len(), 5);
+    assert_eq!(air_station.source.len(), 1);
+    assert_eq!(pollutant[0].code, "pm2p5");
+    assert_eq!(pollutant[0].name, "PM 2.5");
+    assert_eq!(pollutant[0].full_name, "Fine particulate matter (<2.5µm)");
+    assert_eq!(pollutant[0].concentration.value, 19.0);
+    assert_eq!(pollutant[0].concentration.unit, "μg/m3");
 }
