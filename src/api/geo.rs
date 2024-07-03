@@ -1,7 +1,13 @@
 use log::debug;
+use serde::{Deserialize, Serialize};
+use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from_string};
 use url::Url;
 
-use crate::{client::QWeatherClient, GEO_API_URL, model::StaticDataResponse};
+use crate::{
+    client::QWeatherClient,
+    GEO_API_URL,
+    model::{Refer, StaticDataResponse},
+};
 
 impl QWeatherClient {
     /// 城市搜索
@@ -38,7 +44,7 @@ impl QWeatherClient {
         adm: Option<&str>,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse, reqwest::Error> {
+    ) -> Result<CityLookupResponse, reqwest::Error> {
         let url = format!("{}/v2/city/lookup", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -60,7 +66,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<StaticDataResponse>()
+            .json()
             .await
     }
 
@@ -197,4 +203,221 @@ impl QWeatherClient {
             .json::<StaticDataResponse>()
             .await
     }
+}
+
+/// 地点信息
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Location {
+    /// 地区/城市名称
+    pub name: String,
+    /// 地区/城市ID
+    pub id: String,
+    /// 地区/城市纬度
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub lat: f64,
+    /// 地区/城市经度
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub lon: f64,
+    /// 地区/城市的上级行政区划名称
+    pub adm2: String,
+    /// 地区/城市所属一级行政区域
+    pub adm1: String,
+    /// 地区/城市所属国家名称
+    pub country: String,
+    /// 地区/城市所在[时区](https://dev.qweather.com/docs/resource/glossary/#timezone)
+    pub tz: String,
+    /// 地区/城市目前与UTC时间偏移的小时数，参考[详细说明](https://dev.qweather.com/docs/resource/glossary/#utc-offset)
+    pub utc_offset: String,
+    /// 地区/城市是否当前处于[夏令时](https://dev.qweather.com/docs/resource/glossary/#daylight-saving-time)。1 表示当前处于夏令时，0 表示当前不是夏令时。
+    #[serde(deserialize_with = "deserialize_bool_from_anything")]
+    pub is_dst: bool,
+    /// 地区/城市的属性
+    pub type_: String,
+    /// [地区评分](https://dev.qweather.com/docs/resource/glossary/#rank)
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub rank: i32,
+    /// 该地区的天气预报网页链接，便于嵌入你的网站或应用
+    pub fx_link: String,
+}
+
+/// 城市搜索返回值
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CityLookupResponse {
+    /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
+    pub code: String,
+    pub location: Vec<Location>,
+    pub refer: Refer,
+}
+
+#[test]
+fn test_location() {
+    let json_data = r#"{
+  "code":"200",
+  "location":[
+    {
+      "name":"北京",
+      "id":"101010100",
+      "lat":"39.90499",
+      "lon":"116.40529",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"10",
+      "fxLink":"https://www.qweather.com/weather/beijing-101010100.html"
+    },
+    {
+      "name":"海淀",
+      "id":"101010200",
+      "lat":"39.95607",
+      "lon":"116.31032",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/haidian-101010200.html"
+    },
+    {
+      "name":"朝阳",
+      "id":"101010300",
+      "lat":"39.92149",
+      "lon":"116.48641",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/chaoyang-101010300.html"
+    },
+    {
+      "name":"昌平",
+      "id":"101010700",
+      "lat":"40.21809",
+      "lon":"116.23591",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"23",
+      "fxLink":"https://www.qweather.com/weather/changping-101010700.html"
+    },
+    {
+      "name":"房山",
+      "id":"101011200",
+      "lat":"39.73554",
+      "lon":"116.13916",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"23",
+      "fxLink":"https://www.qweather.com/weather/fangshan-101011200.html"
+    },
+    {
+      "name":"通州",
+      "id":"101010600",
+      "lat":"39.90249",
+      "lon":"116.65860",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"23",
+      "fxLink":"https://www.qweather.com/weather/tongzhou-101010600.html"
+    },
+    {
+      "name":"丰台",
+      "id":"101010900",
+      "lat":"39.86364",
+      "lon":"116.28696",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"25",
+      "fxLink":"https://www.qweather.com/weather/fengtai-101010900.html"
+    },
+    {
+      "name":"大兴",
+      "id":"101011100",
+      "lat":"39.72891",
+      "lon":"116.33804",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"25",
+      "fxLink":"https://www.qweather.com/weather/daxing-101011100.html"
+    },
+    {
+      "name":"延庆",
+      "id":"101010800",
+      "lat":"40.46532",
+      "lon":"115.98501",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"33",
+      "fxLink":"https://www.qweather.com/weather/yanqing-101010800.html"
+    },
+    {
+      "name":"平谷",
+      "id":"101011500",
+      "lat":"40.14478",
+      "lon":"117.11234",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"33",
+      "fxLink":"https://www.qweather.com/weather/pinggu-101011500.html"
+    }
+  ],
+  "refer":{
+    "sources":[
+      "QWeather"
+    ],
+    "license":[
+      "QWeather Developers License"
+    ]
+  }
+}"#;
+
+    let resp = serde_json::from_str::<CityLookupResponse>(json_data).unwrap();
+    assert_eq!(resp.code, "200");
+
 }
