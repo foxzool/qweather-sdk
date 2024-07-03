@@ -22,7 +22,7 @@ impl QWeatherClient {
     pub async fn grid_weather_now(
         &self,
         location: &str,
-    ) -> Result<GridNowResponse, reqwest::Error> {
+    ) -> Result<GridWeatherNowResponse, reqwest::Error> {
         let url = format!("{}/v7/grid-weather/now", self.base_url);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -38,7 +38,7 @@ impl QWeatherClient {
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "now")]
-pub struct GridNow {
+pub struct GridWeatherNow {
     /// 数据观测时间
     #[serde(deserialize_with = "decode_datetime")]
     pub obs_time: DateTime<FixedOffset>,
@@ -79,7 +79,7 @@ pub struct GridNow {
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct GridNowResponse {
+pub struct GridWeatherNowResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
     pub code: String,
     ///  当前[API的最近更新时间](https://dev.qweather.com/docs/resource/glossary/#update-time)
@@ -87,7 +87,7 @@ pub struct GridNowResponse {
     pub update_time: DateTime<FixedOffset>,
     /// 当前数据的响应式页面，便于嵌入网站或应用
     pub fx_link: String,
-    pub now: GridNow,
+    pub now: GridWeatherNow,
     pub refer: Refer,
 }
 
@@ -122,6 +122,6 @@ fn test_grid_weather_now() {
   }
 }"#;
 
-    let resp = serde_json::from_str::<GridNowResponse>(json_data).unwrap();
+    let resp = serde_json::from_str::<GridWeatherNowResponse>(json_data).unwrap();
     assert_eq!(resp.now.temp, -1.0);
 }
