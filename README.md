@@ -4,7 +4,7 @@
 [![CI](https://github.com/foxzool/qweather-sdk/workflows/CI/badge.svg)](https://github.com/foxzool/qweather-sdk/actions)
 [![Documentation](https://docs.rs/qweather-sdk/badge.svg)](https://docs.rs/qweather-sdk)
 
-# 和风天气SDK
+# 和风天气API SDK
 
 ## Example
 
@@ -27,6 +27,9 @@ async fn main() {
 ```
 
 ## 已完成的API
+
+- GeoAPI
+  - [x] 城市搜索
 
 - 城市天气
     - [x] 实时天气

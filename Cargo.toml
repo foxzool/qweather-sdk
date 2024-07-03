@@ -39,3 +39,7 @@ path = "examples/weather_daily_forecast.rs"
 [[example]]
 name = "weather_hourly_forecast"
 path = "examples/weather_hourly_forecast.rs"
+
+[[example]]
+name = "geo_city_lookup"
+path = "examples/geo_city_lookup.rs"

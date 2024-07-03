@@ -3,13 +3,13 @@ use url::Url;
 
 use crate::{
     client::QWeatherClient,
-    model::{ApiResponse, DataType},
+    model::{DynamicDataResponse, DataType},
     SDKResult,
 };
 
 impl QWeatherClient {
     /// 实时天气
-    pub async fn weather_now(&self, location: &str) -> SDKResult<ApiResponse<DataType>> {
+    pub async fn weather_now(&self, location: &str) -> SDKResult<DynamicDataResponse<DataType>> {
         let url = format!("{}/v7/weather/now", self.base_url);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -21,7 +21,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<ApiResponse<DataType>>()
+            .json::<DynamicDataResponse<DataType>>()
             .await
     }
 
@@ -30,7 +30,7 @@ impl QWeatherClient {
         &self,
         location: &str,
         day: u8,
-    ) -> SDKResult<ApiResponse<DataType>> {
+    ) -> SDKResult<DynamicDataResponse<DataType>> {
         if ![3u8, 7, 10, 15, 30].contains(&day) {
             panic!("invalid day")
         }
@@ -45,7 +45,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<ApiResponse<DataType>>()
+            .json::<DynamicDataResponse<DataType>>()
             .await
     }
 
@@ -54,7 +54,7 @@ impl QWeatherClient {
         &self,
         location: &str,
         hour: u8,
-    ) -> SDKResult<ApiResponse<DataType>> {
+    ) -> SDKResult<DynamicDataResponse<DataType>> {
         if ![24u8, 72, 168].contains(&hour) {
             panic!("invalid hour")
         }
@@ -69,7 +69,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<ApiResponse<DataType>>()
+            .json::<DynamicDataResponse<DataType>>()
             .await
     }
 }
