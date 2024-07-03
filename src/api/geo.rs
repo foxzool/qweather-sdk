@@ -3,11 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from_string};
 use url::Url;
 
-use crate::{
-    client::QWeatherClient,
-    GEO_API_URL,
-    model::{Refer, StaticDataResponse},
-};
+use crate::{client::QWeatherClient, GEO_API_URL, model::Refer};
 
 impl QWeatherClient {
     /// 城市搜索
@@ -62,12 +58,7 @@ impl QWeatherClient {
 
         debug!("request city_lookup {}", url);
 
-        self.client
-            .get(url)
-            .send()
-            .await?
-            .json()
-            .await
+        self.client.get(url).send().await?.json().await
     }
 
     /// 热门城市查询
@@ -84,7 +75,7 @@ impl QWeatherClient {
         &self,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse, reqwest::Error> {
+    ) -> Result<CityLookupResponse, reqwest::Error> {
         let url = format!("{}/v2/city/top", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -98,12 +89,7 @@ impl QWeatherClient {
 
         debug!("request geo_city_top {}", url);
 
-        self.client
-            .get(url)
-            .send()
-            .await?
-            .json::<StaticDataResponse>()
-            .await
+        self.client.get(url).send().await?.json().await
     }
 
     /// POI搜索
@@ -131,7 +117,7 @@ impl QWeatherClient {
         type_: &str,
         city: Option<&str>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse, reqwest::Error> {
+    ) -> Result<POIResponse, reqwest::Error> {
         let url = format!("{}/v2/poi/lookup", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -147,12 +133,7 @@ impl QWeatherClient {
 
         debug!("request geo_poi_lookup {}", url);
 
-        self.client
-            .get(url)
-            .send()
-            .await?
-            .json::<StaticDataResponse>()
-            .await
+        self.client.get(url).send().await?.json().await
     }
 
     /// POI范围搜索
@@ -179,7 +160,7 @@ impl QWeatherClient {
         type_: &str,
         radius: Option<f32>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse, reqwest::Error> {
+    ) -> Result<POIResponse, reqwest::Error> {
         let url = format!("{}/v2/poi/range", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -196,12 +177,7 @@ impl QWeatherClient {
 
         debug!("request geo_poi_range {}", url);
 
-        self.client
-            .get(url)
-            .send()
-            .await?
-            .json::<StaticDataResponse>()
-            .await
+        self.client.get(url).send().await?.json().await
     }
 }
 
@@ -251,7 +227,6 @@ pub struct CityLookupResponse {
     pub refer: Refer,
 }
 
-
 /// 热门城市查询返回值
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -259,6 +234,19 @@ pub struct TopCityResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
     pub code: String,
     pub top_city_list: Vec<Location>,
+    pub refer: Refer,
+}
+
+/// POI（兴趣点）
+pub type POI = Location;
+
+/// POI搜索返回值
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct POIResponse {
+    /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
+    pub code: String,
+    pub poi: Vec<POI>,
     pub refer: Refer,
 }
 
@@ -430,9 +418,7 @@ fn test_location() {
 
     let resp = serde_json::from_str::<CityLookupResponse>(json_data).unwrap();
     assert_eq!(resp.code, "200");
-
 }
-
 
 #[test]
 fn test_city_top() {
@@ -542,5 +528,54 @@ fn test_city_top() {
 
     let resp = serde_json::from_str::<TopCityResponse>(json_data).unwrap();
     assert_eq!(resp.code, "200");
+}
 
+#[test]
+fn test_poi_lookup() {
+    let json_data = r#"{
+  "code": "200",
+  "poi": [
+    {
+      "name": "景山公园",
+      "id": "10101010012A",
+      "lat": "39.91999",
+      "lon": "116.38999",
+      "adm2": "北京",
+      "adm1": "北京",
+      "country": "中国",
+      "tz": "Asia/Shanghai",
+      "utcOffset": "+08:00",
+      "isDst": "0",
+      "type": "scenic",
+      "rank": "67",
+      "fxLink": "https://www.qweather.com"
+    },
+    {
+      "name": "静思园",
+      "id": "10119040702A",
+      "lat": "31.15999",
+      "lon": "120.68000",
+      "adm2": "苏州",
+      "adm1": "苏州",
+      "country": "中国",
+      "tz": "Asia/Shanghai",
+      "utcOffset": "+08:00",
+      "isDst": "0",
+      "type": "scenic",
+      "rank": "86",
+      "fxLink": "https://www.qweather.com"
+    }
+  ],
+  "refer": {
+    "sources": [
+      "QWeather"
+    ],
+    "license": [
+      "QWeather Developers License"
+    ]
+  }
+}"#;
+
+    let resp = serde_json::from_str::<POIResponse>(json_data).unwrap();
+    assert_eq!(resp.code, "200");
 }

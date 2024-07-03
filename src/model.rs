@@ -1,7 +1,6 @@
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
-use crate::api::geo::Location;
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -42,12 +41,7 @@ pub struct Refer {
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(untagged)]
 pub enum DataType {
-    POI {
-        poi: Vec<POI>,
-    },
-    Minutely {
-        minutely: Vec<Minutely>,
-    },
+    Minutely { minutely: Vec<Minutely> },
 }
 
 pub fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
@@ -58,12 +52,6 @@ where
     let dt = DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
     Ok(dt)
 }
-
-
-
-
-/// POI（兴趣点）
-pub type POI = Location;
 
 /// 分钟降水
 #[derive(Deserialize, Serialize, Debug)]
@@ -82,61 +70,7 @@ pub struct Minutely {
 
 #[cfg(test)]
 mod test {
-    use crate::model::{DynamicDataResponse, StaticDataResponse};
-
-
-
-
-
-    #[test]
-    fn test_poi_lookup() {
-        let json_data = r#"{
-  "code": "200",
-  "poi": [
-    {
-      "name": "景山公园",
-      "id": "10101010012A",
-      "lat": "39.91999",
-      "lon": "116.38999",
-      "adm2": "北京",
-      "adm1": "北京",
-      "country": "中国",
-      "tz": "Asia/Shanghai",
-      "utcOffset": "+08:00",
-      "isDst": "0",
-      "type": "scenic",
-      "rank": "67",
-      "fxLink": "https://www.qweather.com"
-    },
-    {
-      "name": "静思园",
-      "id": "10119040702A",
-      "lat": "31.15999",
-      "lon": "120.68000",
-      "adm2": "苏州",
-      "adm1": "苏州",
-      "country": "中国",
-      "tz": "Asia/Shanghai",
-      "utcOffset": "+08:00",
-      "isDst": "0",
-      "type": "scenic",
-      "rank": "86",
-      "fxLink": "https://www.qweather.com"
-    }
-  ],
-  "refer": {
-    "sources": [
-      "QWeather"
-    ],
-    "license": [
-      "QWeather Developers License"
-    ]
-  }
-}"#;
-
-        let resp = serde_json::from_str::<StaticDataResponse>(json_data);
-        assert!(resp.is_ok())
-    }
+    use crate::model::DynamicDataResponse;
 
     #[test]
     fn test_minutely() {
