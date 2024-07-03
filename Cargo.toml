@@ -59,3 +59,7 @@ path = "examples/geo_poi_range.rs"
 [[example]]
 name = "minutely_precipitation"
 path = "examples/minutely_precipitation.rs"
+
+[[example]]
+name = "grid_weather_now"
+path = "examples/grid_weather_now.rs"

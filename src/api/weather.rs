@@ -26,7 +26,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<DynamicDataResponse>()
+            .json()
             .await
     }
 
@@ -62,7 +62,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<DynamicDataResponse>()
+            .json()
             .await
     }
 
@@ -97,7 +97,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<DynamicDataResponse>()
+            .json()
             .await
     }
 }

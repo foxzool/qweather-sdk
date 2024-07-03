@@ -19,13 +19,14 @@ pub struct DynamicDataResponse {
     pub refer: Refer,
 }
 
+
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct StaticDataResponse<T> {
+pub struct StaticDataResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
     pub code: String,
     #[serde(flatten)]
-    pub data: T,
+    pub data: DataType,
     pub refer: Refer,
 }
 
@@ -65,7 +66,7 @@ pub enum DataType {
     },
 }
 
-fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
+pub fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -74,7 +75,7 @@ where
     Ok(dt)
 }
 
-/// 实时天气返回值
+/// 实时天气返回值`
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Now {
@@ -291,7 +292,7 @@ pub struct Minutely {
 
 #[cfg(test)]
 mod test {
-    use crate::model::{DataType, DynamicDataResponse, StaticDataResponse};
+    use crate::model::{DynamicDataResponse, StaticDataResponse};
 
     #[test]
     fn test_weather_now() {
@@ -1017,7 +1018,7 @@ mod test {
   }
 }"#;
 
-        let resp = serde_json::from_str::<StaticDataResponse<DataType>>(json_data);
+        let resp = serde_json::from_str::<StaticDataResponse>(json_data);
         assert!(resp.is_ok())
     }
 
@@ -1127,7 +1128,7 @@ mod test {
   }
 }"#;
 
-        let resp = serde_json::from_str::<StaticDataResponse<DataType>>(json_data);
+        let resp = serde_json::from_str::<StaticDataResponse>(json_data);
         assert!(resp.is_ok())
     }
 
@@ -1177,7 +1178,7 @@ mod test {
   }
 }"#;
 
-        let resp = serde_json::from_str::<StaticDataResponse<DataType>>(json_data);
+        let resp = serde_json::from_str::<StaticDataResponse>(json_data);
         assert!(resp.is_ok())
     }
 
@@ -1323,4 +1324,6 @@ mod test {
         let resp = serde_json::from_str::<DynamicDataResponse>(json_data);
         assert!(resp.is_ok())
     }
+
+
 }

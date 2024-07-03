@@ -1,16 +1,13 @@
 use log::debug;
 use url::Url;
 
-use crate::{
-    client::QWeatherClient,
-    model::{DataType, StaticDataResponse},
-    GEO_API_URL,
-};
+use crate::{client::QWeatherClient, GEO_API_URL, model::StaticDataResponse};
 
 impl QWeatherClient {
     /// 城市搜索
     ///
-    /// 城市搜索API提供全球地理位位置、全球城市搜索服务，支持经纬度坐标反查、多语言、模糊搜索等功能。
+    /// 城市搜索API提供全球地理位位置、全球城市搜索服务，支持经纬度坐标反查、多语言、
+    /// 模糊搜索等功能。
     ///
     /// # Arguments
     ///
@@ -41,7 +38,7 @@ impl QWeatherClient {
         adm: Option<&str>,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse<DataType>, reqwest::Error> {
+    ) -> Result<StaticDataResponse, reqwest::Error> {
         let url = format!("{}/v2/city/lookup", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -63,7 +60,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<StaticDataResponse<DataType>>()
+            .json::<StaticDataResponse>()
             .await
     }
 
@@ -81,7 +78,7 @@ impl QWeatherClient {
         &self,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse<DataType>, reqwest::Error> {
+    ) -> Result<StaticDataResponse, reqwest::Error> {
         let url = format!("{}/v2/city/top", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -99,7 +96,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<StaticDataResponse<DataType>>()
+            .json::<StaticDataResponse>()
             .await
     }
 
@@ -128,7 +125,7 @@ impl QWeatherClient {
         type_: &str,
         city: Option<&str>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse<DataType>, reqwest::Error> {
+    ) -> Result<StaticDataResponse, reqwest::Error> {
         let url = format!("{}/v2/poi/lookup", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -148,10 +145,9 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<StaticDataResponse<DataType>>()
+            .json::<StaticDataResponse>()
             .await
     }
-
 
     /// POI范围搜索
     ///
@@ -177,7 +173,7 @@ impl QWeatherClient {
         type_: &str,
         radius: Option<f32>,
         number: Option<u32>,
-    ) -> Result<StaticDataResponse<DataType>, reqwest::Error> {
+    ) -> Result<StaticDataResponse, reqwest::Error> {
         let url = format!("{}/v2/poi/range", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
@@ -198,7 +194,7 @@ impl QWeatherClient {
             .get(url)
             .send()
             .await?
-            .json::<StaticDataResponse<DataType>>()
+            .json::<StaticDataResponse>()
             .await
     }
 }
