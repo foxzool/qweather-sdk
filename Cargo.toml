@@ -75,3 +75,7 @@ path = "examples/grid_weather_hourly_forecast.rs"
 [[example]]
 name = "weather_warning"
 path = "examples/weather_warning.rs"
+
+[[example]]
+name = "weather_warning_city_list"
+path = "examples/weather_warning_city_list.rs"

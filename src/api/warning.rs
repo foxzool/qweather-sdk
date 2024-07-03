@@ -31,6 +31,29 @@ impl QWeatherClient {
 
         self.client.get(url).send().await?.json().await
     }
+
+    /// 天气预警城市列表
+    ///
+    /// 获取指定国家或地区当前正在发生天气灾害预警的城市列表，根据这些城市列表再查询对应城市的天气灾害预警。
+    ///
+    ///
+    /// # 参数
+    ///
+    /// * range 选择指定的国家或地区，使用ISO 3166格式。例如range=cn或range=hk。目前该功能仅支持中国（包括港澳台）地区的城市列表，
+    ///   其他国家和地区请使用请使用天气灾害预警单独获取
+    pub async fn weather_warning_city_list(
+        &self,
+        range: &str,
+    ) -> SDKResult<WeatherWarningCityListResponse> {
+        let url = format!("{}/v7/warning/list", self.base_url);
+        let mut url = Url::parse(&url).unwrap();
+        url.set_query(Some(&self.query));
+        url.query_pairs_mut().append_pair("range", range);
+
+        debug!("request weather_warning {}", url);
+
+        self.client.get(url).send().await?.json().await
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -87,6 +110,28 @@ pub struct WeatherWarningResponse {
     pub warning: Vec<WeatherWarning>,
     /// 数据来源
     pub refer: Refer,
+}
+
+/// 天气预警城市列表
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct WeatherWarningCityListResponse {
+    /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
+    pub code: String,
+    /// 当前[API的最近更新时间](https://dev.qweather.com/docs/resource/glossary/#update-time)
+    #[serde(deserialize_with = "decode_datetime")]
+    pub update_time: DateTime<FixedOffset>,
+    /// 当前国家预警的LocationID
+    pub warning_loc_list: Vec<LocationId>,
+    /// 数据来源
+    pub refer: Refer,
+}
+
+/// LocationID
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct LocationId {
+    pub location_id: String,
 }
 
 #[test]
@@ -152,4 +197,148 @@ fn test_weather_warning() {
     assert_eq!(warning.certainty, "");
     assert_eq!(warning.text, "上海中心气象台2023年04月03日10时30分发布大风蓝色预警[Ⅳ级/一般]：受江淮气旋影响，预计明天傍晚以前本市大部地区将出现6级阵风7-8级的东南大风，沿江沿海地区7级阵风8-9级，请注意防范大风对高空作业、交通出行、设施农业等的不利影响。");
     assert_eq!(warning.related, "");
+}
+
+#[test]
+fn test_weather_warning_city_list() {
+    let json_data = r#"{
+  "code": "200",
+  "updateTime": "2020-06-21T05:39+00:00",
+  "warningLocList": [
+    {
+      "locationId": "101010800"
+    },
+    {
+      "locationId": "101011200"
+    },
+    {
+      "locationId": "101011400"
+    },
+    {
+      "locationId": "101020700"
+    },
+    {
+      "locationId": "101040400"
+    },
+    {
+      "locationId": "101041900"
+    },
+    {
+      "locationId": "101043400"
+    },
+    {
+      "locationId": "101043600"
+    },
+    {
+      "locationId": "101050106"
+    },
+    {
+      "locationId": "101050107"
+    },
+    {
+      "locationId": "101050301"
+    },
+    {
+      "locationId": "101050302"
+    },
+    {
+      "locationId": "101050303"
+    },
+    {
+      "locationId": "101130103"
+    },
+    {
+      "locationId": "101130109"
+    },
+    {
+      "locationId": "101130114"
+    },
+    {
+      "locationId": "101130302"
+    },
+    {
+      "locationId": "101130303"
+    },
+    {
+      "locationId": "101130409"
+    },
+    {
+      "locationId": "101130610"
+    },
+    {
+      "locationId": "101130611"
+    },
+    {
+      "locationId": "101130613"
+    },
+    {
+      "locationId": "101130614"
+    },
+    {
+      "locationId": "101131920"
+    },
+    {
+      "locationId": "101221008"
+    },
+    {
+      "locationId": "101230507"
+    },
+    {
+      "locationId": "101132101"
+    },
+    {
+      "locationId": "101132201"
+    },
+    {
+      "locationId": "101132301"
+    }
+  ],
+  "refer": {
+    "sources": [
+      "12379",
+      "QWeather"
+    ],
+    "license": [
+      "QWeather Developers License"
+    ]
+  }
+}"#;
+
+    let resp: WeatherWarningCityListResponse = serde_json::from_str(json_data).unwrap();
+    assert_eq!(resp.code, "200");
+    assert_eq!(
+        resp.update_time,
+        DateTime::parse_from_rfc3339("2020-06-21T05:39:00+00:00").unwrap()
+    );
+    assert_eq!(resp.warning_loc_list.len(), 29);
+    let location_id = &resp.warning_loc_list[0];
+    assert_eq!(location_id.location_id, "101010800");
+    let location_id = &resp.warning_loc_list[1];
+    assert_eq!(location_id.location_id, "101011200");
+    let location_id = &resp.warning_loc_list[2];
+    assert_eq!(location_id.location_id, "101011400");
+    let location_id = &resp.warning_loc_list[3];
+    assert_eq!(location_id.location_id, "101020700");
+    let location_id = &resp.warning_loc_list[4];
+    assert_eq!(location_id.location_id, "101040400");
+    let location_id = &resp.warning_loc_list[5];
+    assert_eq!(location_id.location_id, "101041900");
+    let location_id = &resp.warning_loc_list[6];
+    assert_eq!(location_id.location_id, "101043400");
+    let location_id = &resp.warning_loc_list[7];
+    assert_eq!(location_id.location_id, "101043600");
+    let location_id = &resp.warning_loc_list[8];
+    assert_eq!(location_id.location_id, "101050106");
+    let location_id = &resp.warning_loc_list[9];
+    assert_eq!(location_id.location_id, "101050107");
+    let location_id = &resp.warning_loc_list[10];
+    assert_eq!(location_id.location_id, "101050301");
+    let location_id = &resp.warning_loc_list[11];
+    assert_eq!(location_id.location_id, "101050302");
+    let location_id = &resp.warning_loc_list[12];
+    assert_eq!(location_id.location_id, "101050303");
+    let location_id = &resp.warning_loc_list[13];
+    assert_eq!(location_id.location_id, "101130103");
+    let location_id = &resp.warning_loc_list[14];
+    assert_eq!(location_id.location_id, "101130109");
 }
