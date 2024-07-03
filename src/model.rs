@@ -53,8 +53,8 @@ pub enum DataType {
         top_city_list: Vec<Location>,
     },
     POI {
-        poi: Vec<POI>
-    }
+        poi: Vec<POI>,
+    },
 }
 
 fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>

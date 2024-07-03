@@ -1,2 +1,2 @@
-pub mod weather;
 pub mod geo;
+pub mod weather;
