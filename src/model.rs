@@ -36,10 +36,22 @@ pub struct Refer {
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(untagged)]
 pub enum DataType {
-    Now { now: Now },
-    Daily { daily: Vec<DailyForecast> },
-    Hourly { hourly: Vec<HourlyForecast> },
-    Location { location: Vec<Location> },
+    Now {
+        now: Now,
+    },
+    Daily {
+        daily: Vec<DailyForecast>,
+    },
+    Hourly {
+        hourly: Vec<HourlyForecast>,
+    },
+    Location {
+        location: Vec<Location>,
+    },
+    TopCityList {
+        #[serde(rename = "topCityList")]
+        top_city_list: Vec<Location>,
+    },
 }
 
 fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
@@ -250,7 +262,7 @@ pub struct Location {
 
 #[cfg(test)]
 mod test {
-    use crate::model::{DynamicDataResponse, DataType, StaticDataResponse};
+    use crate::model::{DataType, DynamicDataResponse, StaticDataResponse};
 
     #[test]
     fn test_weather_now() {
@@ -964,6 +976,116 @@ mod test {
       "type":"city",
       "rank":"33",
       "fxLink":"https://www.qweather.com/weather/pinggu-101011500.html"
+    }
+  ],
+  "refer":{
+    "sources":[
+      "QWeather"
+    ],
+    "license":[
+      "QWeather Developers License"
+    ]
+  }
+}"#;
+
+        let resp = serde_json::from_str::<StaticDataResponse<DataType>>(json_data);
+        assert!(resp.is_ok())
+    }
+
+    #[test]
+    fn test_city_top() {
+        let json_data = r#"{
+  "code":"200",
+  "topCityList":[
+    {
+      "name":"北京",
+      "id":"101010100",
+      "lat":"39.90499",
+      "lon":"116.40529",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"10",
+      "fxLink":"https://www.qweather.com/weather/beijing-101010100.html"
+    },
+    {
+      "name":"朝阳",
+      "id":"101010300",
+      "lat":"39.92149",
+      "lon":"116.48641",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/chaoyang-101010300.html"
+    },
+    {
+      "name":"海淀",
+      "id":"101010200",
+      "lat":"39.95607",
+      "lon":"116.31032",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/haidian-101010200.html"
+    },
+    {
+      "name":"深圳",
+      "id":"101280601",
+      "lat":"22.54700",
+      "lon":"114.08595",
+      "adm2":"深圳",
+      "adm1":"广东省",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"13",
+      "fxLink":"https://www.qweather.com/weather/shenzhen-101280601.html"
+    },
+    {
+      "name":"上海",
+      "id":"101020100",
+      "lat":"31.23171",
+      "lon":"121.47264",
+      "adm2":"上海",
+      "adm1":"上海市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"11",
+      "fxLink":"https://www.qweather.com/weather/shanghai-101020100.html"
+    },
+    {
+      "name":"浦东新区",
+      "id":"101020600",
+      "lat":"31.24594",
+      "lon":"121.56770",
+      "adm2":"上海",
+      "adm1":"上海市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/pudong-101020600.html"
     }
   ],
   "refer":{

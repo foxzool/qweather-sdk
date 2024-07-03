@@ -40,4 +40,31 @@ impl QWeatherClient {
             .json::<StaticDataResponse<DataType>>()
             .await
     }
+
+    /// 热门城市查询
+    pub async fn geo_city_top(
+        &self,
+        range: Option<&str>,
+        number: Option<u32>,
+    ) -> Result<StaticDataResponse<DataType>, reqwest::Error> {
+        let url = format!("{}/v2/city/top", GEO_API_URL);
+        let mut url = Url::parse(&url).unwrap();
+        url.set_query(Some(&self.query));
+        if let Some(range) = range {
+            url.query_pairs_mut().append_pair("range", range);
+        }
+        if let Some(number) = number {
+            url.query_pairs_mut()
+                .append_pair("number", &number.to_string());
+        }
+
+        debug!("request geo_city_top {}", url);
+
+        self.client
+            .get(url)
+            .send()
+            .await?
+            .json::<StaticDataResponse<DataType>>()
+            .await
+    }
 }
