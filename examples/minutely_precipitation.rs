@@ -11,9 +11,6 @@ async fn main() {
     let key = env::var("QWEATHER_KEY").unwrap();
 
     let client = QWeatherClient::new(key, false);
-    let resp = client
-        .minutely_precipitation("116.38,39.91")
-        .await
-        .unwrap();
+    let resp = client.minutely_precipitation("116.38,39.91").await.unwrap();
     println!("{:#?}", resp);
 }

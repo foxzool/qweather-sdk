@@ -5,8 +5,8 @@ use serde_aux::prelude::*;
 use url::Url;
 
 use crate::{
+    api::{decode_datetime, Refer},
     client::QWeatherClient,
-    model::{decode_datetime, Refer},
 };
 
 impl QWeatherClient {

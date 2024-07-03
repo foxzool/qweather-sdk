@@ -13,6 +13,5 @@ pub static WEATHER_DEV_API_URL: &str = "https://devapi.qweather.com";
 
 pub mod api;
 pub mod client;
-pub mod model;
 
 pub type SDKResult<T> = Result<T, reqwest::Error>;

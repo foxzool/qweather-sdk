@@ -5,8 +5,8 @@ use serde_aux::prelude::{deserialize_number_from_string, deserialize_option_numb
 use url::Url;
 
 use crate::{
+    api::{decode_datetime, Refer},
     client::QWeatherClient,
-    model::{decode_datetime, Refer},
     SDKResult,
 };
 

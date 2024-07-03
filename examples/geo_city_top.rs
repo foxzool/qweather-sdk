@@ -11,6 +11,6 @@ async fn main() {
     let key = env::var("QWEATHER_KEY").unwrap();
 
     let client = QWeatherClient::new(key, false);
-    let resp = client.geo_city_top(None, None).await.unwrap().data;
+    let resp = client.geo_city_top(None, None).await.unwrap();
     println!("{:#?}", resp);
 }

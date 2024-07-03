@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from_string};
 use url::Url;
 
-use crate::{client::QWeatherClient, GEO_API_URL, model::Refer};
+use crate::{api::Refer, client::QWeatherClient, GEO_API_URL};
 
 impl QWeatherClient {
     /// 城市搜索
@@ -75,7 +75,7 @@ impl QWeatherClient {
         &self,
         range: Option<&str>,
         number: Option<u32>,
-    ) -> Result<CityLookupResponse, reqwest::Error> {
+    ) -> Result<TopCityResponse, reqwest::Error> {
         let url = format!("{}/v2/city/top", GEO_API_URL);
         let mut url = Url::parse(&url).unwrap();
         url.set_query(Some(&self.query));
