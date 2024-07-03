@@ -83,3 +83,7 @@ path = "examples/weather_warning_city_list.rs"
 [[example]]
 name = "indices_forecast"
 path = "examples/indices_forecast.rs"
+
+[[example]]
+name = "air_now"
+path = "examples/air_now.rs"

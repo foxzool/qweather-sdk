@@ -7,6 +7,7 @@ pub mod minutely;
 pub mod warning;
 pub mod weather;
 pub mod indices;
+pub mod air_quality;
 
 pub fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
