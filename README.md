@@ -51,3 +51,4 @@ async fn main() {
     - [x] 天气指数预报
 - 空气质量(beta)
     - 实时空气质量(beta)
+    - 监测站数据(beta)

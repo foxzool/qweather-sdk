@@ -8,6 +8,7 @@ pub mod warning;
 pub mod weather;
 pub mod indices;
 pub mod air_quality;
+pub mod tropical_cyclone;
 
 pub fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where

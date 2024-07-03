@@ -91,3 +91,8 @@ path = "examples/air_now.rs"
 [[example]]
 name = "air_station"
 path = "examples/air_station.rs"
+
+
+[[example]]
+name = "storm_forecast"
+path = "examples/storm_forecast.rs"
