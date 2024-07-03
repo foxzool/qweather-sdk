@@ -251,6 +251,17 @@ pub struct CityLookupResponse {
     pub refer: Refer,
 }
 
+
+/// 热门城市查询返回值
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TopCityResponse {
+    /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
+    pub code: String,
+    pub top_city_list: Vec<Location>,
+    pub refer: Refer,
+}
+
 #[test]
 fn test_location() {
     let json_data = r#"{
@@ -418,6 +429,118 @@ fn test_location() {
 }"#;
 
     let resp = serde_json::from_str::<CityLookupResponse>(json_data).unwrap();
+    assert_eq!(resp.code, "200");
+
+}
+
+
+#[test]
+fn test_city_top() {
+    let json_data = r#"{
+  "code":"200",
+  "topCityList":[
+    {
+      "name":"北京",
+      "id":"101010100",
+      "lat":"39.90499",
+      "lon":"116.40529",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"10",
+      "fxLink":"https://www.qweather.com/weather/beijing-101010100.html"
+    },
+    {
+      "name":"朝阳",
+      "id":"101010300",
+      "lat":"39.92149",
+      "lon":"116.48641",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/chaoyang-101010300.html"
+    },
+    {
+      "name":"海淀",
+      "id":"101010200",
+      "lat":"39.95607",
+      "lon":"116.31032",
+      "adm2":"北京",
+      "adm1":"北京市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/haidian-101010200.html"
+    },
+    {
+      "name":"深圳",
+      "id":"101280601",
+      "lat":"22.54700",
+      "lon":"114.08595",
+      "adm2":"深圳",
+      "adm1":"广东省",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"13",
+      "fxLink":"https://www.qweather.com/weather/shenzhen-101280601.html"
+    },
+    {
+      "name":"上海",
+      "id":"101020100",
+      "lat":"31.23171",
+      "lon":"121.47264",
+      "adm2":"上海",
+      "adm1":"上海市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"11",
+      "fxLink":"https://www.qweather.com/weather/shanghai-101020100.html"
+    },
+    {
+      "name":"浦东新区",
+      "id":"101020600",
+      "lat":"31.24594",
+      "lon":"121.56770",
+      "adm2":"上海",
+      "adm1":"上海市",
+      "country":"中国",
+      "tz":"Asia/Shanghai",
+      "utcOffset":"+08:00",
+      "isDst":"0",
+      "type":"city",
+      "rank":"15",
+      "fxLink":"https://www.qweather.com/weather/pudong-101020600.html"
+    }
+  ],
+  "refer":{
+    "sources":[
+      "QWeather"
+    ],
+    "license":[
+      "QWeather Developers License"
+    ]
+  }
+}"#;
+
+    let resp = serde_json::from_str::<TopCityResponse>(json_data).unwrap();
     assert_eq!(resp.code, "200");
 
 }
