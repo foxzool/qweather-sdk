@@ -9,6 +9,6 @@ async fn main() {
     let key = env::var("QWEATHER_KEY").unwrap();
 
     let client = QWeatherClient::new(key, false);
-    let resp = client.grid_weather_hourly_forecast("116.41,39.92", 24).await.unwrap();
+    let resp = client.indices_forecast("101021600", "1,2", 1).await.unwrap();
     println!("{:#?}", resp);
 }

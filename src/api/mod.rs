@@ -6,6 +6,7 @@ pub mod grid_weather;
 pub mod minutely;
 pub mod warning;
 pub mod weather;
+pub mod indices;
 
 pub fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
