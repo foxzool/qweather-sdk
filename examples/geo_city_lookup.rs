@@ -11,9 +11,9 @@ async fn main() {
     let key = env::var("QWEATHER_KEY").unwrap();
 
     let client = QWeatherClient::new(key, false);
-    let weather_now = client
+    let resp = client
         .geo_city_lookup("beij", None, None, None)
         .await
         .unwrap();
-    println!("{:#?}", weather_now.data);
+    println!("{:#?}", resp);
 }

@@ -10,5 +10,5 @@ async fn main() {
 
     let client = QWeatherClient::new(key, false);
     let weather_now = client.weather_now("101010100").await.unwrap();
-    println!("{:#?}", weather_now.data);
+    println!("{:#?}", weather_now);
 }

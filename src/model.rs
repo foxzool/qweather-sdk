@@ -52,6 +52,9 @@ pub enum DataType {
         #[serde(rename = "topCityList")]
         top_city_list: Vec<Location>,
     },
+    POI {
+        poi: Vec<POI>
+    }
 }
 
 fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
@@ -259,6 +262,9 @@ pub struct Location {
     /// 该地区的天气预报网页链接，便于嵌入你的网站或应用
     pub fx_link: String,
 }
+
+/// POI（兴趣点）
+pub type POI = Location;
 
 #[cfg(test)]
 mod test {
@@ -1093,6 +1099,56 @@ mod test {
       "QWeather"
     ],
     "license":[
+      "QWeather Developers License"
+    ]
+  }
+}"#;
+
+        let resp = serde_json::from_str::<StaticDataResponse<DataType>>(json_data);
+        assert!(resp.is_ok())
+    }
+
+    #[test]
+    fn test_poi_lookup() {
+        let json_data = r#"{
+  "code": "200",
+  "poi": [
+    {
+      "name": "景山公园",
+      "id": "10101010012A",
+      "lat": "39.91999",
+      "lon": "116.38999",
+      "adm2": "北京",
+      "adm1": "北京",
+      "country": "中国",
+      "tz": "Asia/Shanghai",
+      "utcOffset": "+08:00",
+      "isDst": "0",
+      "type": "scenic",
+      "rank": "67",
+      "fxLink": "https://www.qweather.com"
+    },
+    {
+      "name": "静思园",
+      "id": "10119040702A",
+      "lat": "31.15999",
+      "lon": "120.68000",
+      "adm2": "苏州",
+      "adm1": "苏州",
+      "country": "中国",
+      "tz": "Asia/Shanghai",
+      "utcOffset": "+08:00",
+      "isDst": "0",
+      "type": "scenic",
+      "rank": "86",
+      "fxLink": "https://www.qweather.com"
+    }
+  ],
+  "refer": {
+    "sources": [
+      "QWeather"
+    ],
+    "license": [
       "QWeather Developers License"
     ]
   }

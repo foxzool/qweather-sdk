@@ -21,7 +21,7 @@ async fn main() {
 
     let client = QWeatherClient::new(key, false);
     let weather_now = client.weather_now("101010100").await.unwrap();
-    println!("{:#?}", weather_now.data);
+    println!("{:#?}", weather_now);
 }
 
 ```
@@ -31,6 +31,7 @@ async fn main() {
 - GeoAPI
   - [x] 城市搜索
   - [x] 热门城市查询
+  - [x] POI搜索
 
 - 城市天气
     - [x] 实时天气
