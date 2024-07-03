@@ -111,6 +111,11 @@ impl QWeatherClient {
     ///     * scenic 景点
     ///     * CSTA 潮流站点
     ///     * TSTA 潮汐站点
+    ///
+    /// * city 选择POI所在城市，可设定只搜索在特定城市内的POI信息。
+    ///   城市名称可以是文字或城市的LocationID。默认不限制特定城市。
+    ///
+    /// * number 返回结果的数量，取值范围1-20，默认返回10个结果。
     pub async fn geo_poi_lookup(
         &self,
         location: &str,
@@ -132,6 +137,51 @@ impl QWeatherClient {
         }
 
         debug!("request geo_poi_lookup {}", url);
+
+        self.client
+            .get(url)
+            .send()
+            .await?
+            .json::<StaticDataResponse<DataType>>()
+            .await
+    }
+
+    /// # Arguments
+    ///
+    /// * location(必选) 需要查询地区的名称，支持文字、以英文逗号分隔的经度,纬度坐标（十进制，
+    ///   最多支持小数点后两位）、LocationID或Adcode（仅限中国城市）。例如 location=北京 或
+    ///   location=116.41,39.92
+    ///
+    /// * type_ POI类型，可选择搜索某一类型的POI。
+    ///     * scenic 景点
+    ///     * CSTA 潮流站点
+    ///     * TSTA 潮汐站点
+    ///
+    /// * radius 搜索范围，可设置搜索半径，取值范围1-50，单位：公里。默认5公里。
+    ///
+    /// * number 返回结果的数量，取值范围1-20，默认返回10个结果。
+    pub async fn geo_poi_range(
+        &self,
+        location: &str,
+        type_: &str,
+        radius: Option<f32>,
+        number: Option<u32>,
+    ) -> Result<StaticDataResponse<DataType>, reqwest::Error> {
+        let url = format!("{}/v2/poi/range", GEO_API_URL);
+        let mut url = Url::parse(&url).unwrap();
+        url.set_query(Some(&self.query));
+        url.query_pairs_mut().append_pair("location", location);
+        url.query_pairs_mut().append_pair("type", type_);
+        if let Some(radius) = radius {
+            url.query_pairs_mut()
+                .append_pair("radius", &radius.to_string());
+        }
+        if let Some(number) = number {
+            url.query_pairs_mut()
+                .append_pair("number", &number.to_string());
+        }
+
+        debug!("request geo_poi_range {}", url);
 
         self.client
             .get(url)

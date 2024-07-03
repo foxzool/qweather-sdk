@@ -51,3 +51,7 @@ path = "examples/geo_city_top.rs"
 [[example]]
 name = "geo_poi_lookup"
 path = "examples/geo_poi_lookup.rs"
+
+[[example]]
+name = "geo_poi_range"
+path = "examples/geo_poi_range.rs"
