@@ -1,11 +1,11 @@
 [package]
 name = "qweather-sdk"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "Apache-2.0"
 authors = ["ZoOL <zhooul@gmail.com>"]
 readme = "README.md"
-description = "Client SDK to use QWeather API"
+description = "Client SDK for QWeather API"
 keywords = ["sdk", "qweather", "rest"]
 documentation = "https://docs.rs/qweather-sdk"
 repository = "https://github.com/foxzool/qweather-sdk"

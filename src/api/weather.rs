@@ -6,8 +6,8 @@ use serde_aux::prelude::deserialize_number_from_string;
 
 use crate::{
     api::{decode_datetime, deserialize_option_number_from_empty_string, Refer},
-    APIResult,
     client::QWeatherClient,
+    APIResult,
 };
 
 impl QWeatherClient {

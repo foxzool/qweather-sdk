@@ -1,6 +1,6 @@
-use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from_string};
+use std::collections::BTreeMap;
 
 use crate::{api::Refer, client::QWeatherClient, APIResult, GEO_API_URL};
 
