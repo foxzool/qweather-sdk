@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
@@ -34,7 +35,7 @@ impl QWeatherClient {
             self.get_api_host(),
             air_now_input.location
         );
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), air_now_input.location.to_string());
         params.insert(
             "pollutant".to_string(),
@@ -61,7 +62,7 @@ impl QWeatherClient {
             self.get_api_host(),
             location_id
         );
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location_id.to_string());
 
         self.request_api(url, params).await

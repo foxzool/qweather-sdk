@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
@@ -18,7 +19,7 @@ impl QWeatherClient {
     /// * storm_id : 需要查询的台风ID，StormID可通过台风查询API获取。例如 stormid=NP2018
     pub async fn storm_forecast(&self, storm_id: &str) -> APIResult<StormForecastResponse> {
         let url = "https://api.qweather.com/v7/tropical/storm-forecast".to_string();
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("stormid".to_string(), storm_id.to_string());
 
         self.request_api(url, params).await

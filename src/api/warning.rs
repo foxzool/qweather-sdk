@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +23,7 @@ impl QWeatherClient {
     pub async fn weather_warning(&self, location: &str) -> APIResult<WeatherWarningResponse> {
         let url = format!("{}/v7/warning/now", self.get_api_host());
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location.to_string());
 
         self.request_api(url, params).await
@@ -45,7 +46,7 @@ impl QWeatherClient {
     ) -> APIResult<WeatherWarningCityListResponse> {
         let url = format!("{}/v7/warning/list", self.get_api_host());
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("range".to_string(), range.to_string());
 
         self.request_api(url, params).await

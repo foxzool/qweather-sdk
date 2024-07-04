@@ -1,26 +1,29 @@
 use std::collections::BTreeMap;
 
-use log::debug;
 use md5::{Digest, Md5};
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 
 use crate::{api::APIResponse, WEATHER_API_URL, WEATHER_DEV_API_URL};
 
-/// QWeatherClient
+/// 天气API客户端
 pub struct QWeatherClient {
     api_host: String,
-    pub(crate) client: Client,
+    /// 客户端
+    client: Client,
     /// 基础查询参数
-    pub(crate) base_params: BTreeMap<String, String>,
-    private_key: String,
+    base_params: BTreeMap<String, String>,
+    /// 客户端配置
     client_config: ClientConfig,
 }
 
 /// api 客户端配置
 pub struct ClientConfig {
+    /// 公钥
     pub public_id: String,
+    /// 私钥
     pub private_key: String,
+    /// 是否订阅
     pub subscription: bool,
     /// 多语言设置，请阅读[多语言](https://dev.qweather.com/docs/resource/language/)文档，了解我们的多语言是如何工作、如何设置以及数据是否支持多语言。
     pub lang: Option<String>,
@@ -42,6 +45,7 @@ impl ClientConfig {
 }
 
 impl QWeatherClient {
+    /// 使用配置创建新的客户端
     pub fn with_config(client_config: ClientConfig) -> Self {
         let api_host = if client_config.subscription {
             WEATHER_API_URL.to_string()
@@ -61,16 +65,17 @@ impl QWeatherClient {
             api_host,
             client,
             base_params,
-            private_key: client_config.private_key.to_string(),
             client_config,
         }
     }
 
+    /// 创建新的客户端
     pub fn new(
         public_id: impl ToString,
         private_key: impl ToString,
         subscription: bool,
         lang: impl ToString,
+        unit: impl ToString,
     ) -> Self {
         let api_host = if subscription {
             WEATHER_API_URL.to_string()
@@ -90,13 +95,12 @@ impl QWeatherClient {
             api_host,
             client,
             base_params,
-            private_key: private_key.to_string(),
             client_config: ClientConfig {
                 public_id: public_id.to_string(),
                 private_key: private_key.to_string(),
                 subscription,
                 lang: Some(lang.to_string()),
-                unit: None,
+                unit: Some(unit.to_string()),
             },
         }
     }
@@ -115,6 +119,8 @@ impl QWeatherClient {
     where
         T: serde::de::DeserializeOwned,
     {
+        // 合并参数
+        params.extend(self.base_params.clone());
         params.insert(
             "t".to_string(),
             chrono::Local::now().timestamp().to_string(),
@@ -123,7 +129,6 @@ impl QWeatherClient {
         params.insert("sign".to_string(), sign);
         let response = self.client.get(&url).query(&params).send().await?;
         let body: Value = response.json().await?;
-        debug!("Response: {}", body.to_string());
         let code = body["code"].as_str().unwrap();
         if code == "200" {
             match serde_json::from_value::<T>(body) {
@@ -152,7 +157,7 @@ impl QWeatherClient {
             sign.push_str(&format!("{}={}&", key, value));
         }
         sign.pop();
-        sign.push_str(&self.private_key);
+        sign.push_str(&self.client_config.private_key);
         let mut hasher = Md5::new();
         hasher.update(&sign);
         let sign = format!("{:x}", hasher.finalize());

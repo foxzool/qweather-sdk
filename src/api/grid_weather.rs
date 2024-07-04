@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
@@ -21,7 +22,7 @@ impl QWeatherClient {
     pub async fn grid_weather_now(&self, location: &str) -> APIResult<GridWeatherNowResponse> {
         let url = format!("{}/v7/grid-weather/now", self.get_api_host());
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location.to_string());
 
         self.request_api(url, params).await
@@ -44,7 +45,7 @@ impl QWeatherClient {
         day: i32,
     ) -> APIResult<GridWeatherDailyForecastResponse> {
         let url = format!("{}/v7/grid-weather/{}d", self.get_api_host(), day);
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location.to_string());
 
         self.request_api(url, params).await
@@ -67,7 +68,7 @@ impl QWeatherClient {
         hour: i32,
     ) -> APIResult<GridWeatherHourlyForecastResponse> {
         let url = format!("{}/v7/grid-weather/{}h", self.get_api_host(), hour);
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location.to_string());
 
         self.request_api(url, params).await

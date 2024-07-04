@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from_string};
 
@@ -91,7 +92,7 @@ impl QWeatherClient {
     ) -> APIResult<CityLookupResponse> {
         let url = format!("{}/v2/city/lookup", GEO_API_URL);
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert(
             "location".to_string(),
             city_look_up_input.location.to_string(),
@@ -127,7 +128,7 @@ impl QWeatherClient {
     ) -> APIResult<TopCityResponse> {
         let url = format!("{}/v2/city/top", GEO_API_URL);
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
 
         if let Some(range) = range {
             params.insert("range".to_string(), range.to_string());
@@ -164,7 +165,7 @@ impl QWeatherClient {
     ) -> APIResult<POIResponse> {
         let url = format!("{}/v2/poi/lookup", GEO_API_URL);
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert(
             "location".to_string(),
             geo_poi_lookup_input.location.to_string(),
@@ -204,7 +205,7 @@ impl QWeatherClient {
     ) -> APIResult<POIResponse> {
         let url = format!("{}/v2/poi/range", GEO_API_URL);
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert(
             "location".to_string(),
             geo_poi_range_input.location.to_string(),

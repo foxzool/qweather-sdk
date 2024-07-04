@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
@@ -30,7 +31,7 @@ impl QWeatherClient {
     ) -> APIResult<IndicesForecastResponse> {
         let url = format!("{}/v7/indices/{}d", self.get_api_host(), day);
 
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location.to_string());
         params.insert("type".to_string(), type_.to_string());
 

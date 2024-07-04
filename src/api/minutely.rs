@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
@@ -23,7 +24,7 @@ impl QWeatherClient {
         location: &str,
     ) -> APIResult<MinutePrecipitationResponse> {
         let url = format!("{}/v7/minutely/5m", self.get_api_host());
-        let mut params = self.base_params.clone();
+        let mut params = BTreeMap::new();
         params.insert("location".to_string(), location.to_string());
 
         self.request_api(url, params).await
