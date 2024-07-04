@@ -3,6 +3,59 @@ use serde_aux::prelude::{deserialize_bool_from_anything, deserialize_number_from
 
 use crate::{api::Refer, client::QWeatherClient, APIResult, GEO_API_URL};
 
+/// 城市搜索请求参数
+#[derive(Default)]
+pub struct CityLookupInput<'a> {
+    /// 必选)需要查询地区的名称，支持文字、以英文逗号分隔的经度,纬度坐标（十进制，
+    /// 最多支持小数点后两位）、LocationID或Adcode（仅限中国城市）。例如 location=北京 或
+    /// location=116.41,39.92
+    pub location: &'a str,
+    /// 城市的上级行政区划，可设定只在某个行政区划范围内进行搜索，
+    /// 用于排除重名城市或对结果进行过滤。例如 adm=beijing
+    pub adm: Option<&'a str>,
+    /// 搜索范围，可设定只在某个国家或地区范围内进行搜索，国家和地区名称需使用ISO 3166
+    /// 所定义的国家代码。如果不设置此参数，搜索范围将在所有城市。例如 range=cn
+    pub range: Option<&'a str>,
+    /// 返回结果的数量，取值范围1-20，默认返回10个结果。
+    pub number: Option<u32>,
+}
+
+/// POI搜索请求参数
+pub struct GeoPoiLookupInput<'a> {
+    /// 需要查询地区的名称，支持文字、以英文逗号分隔的经度,纬度坐标（十进制，
+    /// 最多支持小数点后两位）、LocationID或Adcode（仅限中国城市）。例如 location=北京 或
+    /// location=116.41,39.92
+    pub location: &'a str,
+    /// POI类型，可选择搜索某一类型的POI。
+    ///     * scenic 景点
+    ///     * CSTA 潮流站点
+    ///     * TSTA 潮汐站点
+    pub type_: &'a str,
+    /// 选择POI所在城市，可设定只搜索在特定城市内的POI信息。
+    /// 城市名称可以是文字或城市的LocationID。默认不限制特定城市。
+    pub city: Option<&'a str>,
+    /// 返回结果的数量，取值范围1-20，默认返回10个结果。
+    pub number: Option<u32>,
+}
+
+/// POI范围搜索请求参数
+#[derive(Default)]
+pub struct GeoPoiRangeInput<'a> {
+    /// 需要查询地区的名称，支持文字、以英文逗号分隔的经度,纬度坐标（十进制，
+    /// 最多支持小数点后两位）、LocationID或Adcode（仅限中国城市）。例如 location=北京 或
+    /// location=116.41,39.92
+    pub location: &'a str,
+    /// POI类型，可选择搜索某一类型的POI。
+    ///     * scenic 景点
+    ///     * CSTA 潮流站点
+    ///     * TSTA 潮汐站点
+    pub type_: &'a str,
+    /// 搜索范围，可设置搜索半径，取值范围1-50，���位：公里。默认5公里。
+    pub radius: Option<f32>,
+    /// 返回结果的数量，取值范围1-20，默认返回10个结果。
+    pub number: Option<u32>,
+}
+
 impl QWeatherClient {
     /// 城市搜索
     ///
@@ -34,23 +87,23 @@ impl QWeatherClient {
     /// * number返回结果的数量，取值范围1-20，默认返回10个结果。
     pub async fn geo_city_lookup(
         &self,
-        location: &str,
-        adm: Option<&str>,
-        range: Option<&str>,
-        number: Option<u32>,
+        city_look_up_input: CityLookupInput<'_>,
     ) -> APIResult<CityLookupResponse> {
         let url = format!("{}/v2/city/lookup", GEO_API_URL);
 
         let mut params = self.base_params.clone();
-        params.insert("location".to_string(), location.to_string());
+        params.insert(
+            "location".to_string(),
+            city_look_up_input.location.to_string(),
+        );
 
-        if let Some(adm) = adm {
+        if let Some(adm) = city_look_up_input.adm {
             params.insert("adm".to_string(), adm.to_string());
         }
-        if let Some(range) = range {
+        if let Some(range) = city_look_up_input.range {
             params.insert("range".to_string(), range.to_string());
         }
-        if let Some(number) = number {
+        if let Some(number) = city_look_up_input.number {
             params.insert("number".to_string(), number.to_string());
         }
 
@@ -70,7 +123,7 @@ impl QWeatherClient {
     pub async fn geo_city_top(
         &self,
         range: Option<&str>,
-        number: Option<u32>,
+        number: Option<i32>,
     ) -> APIResult<TopCityResponse> {
         let url = format!("{}/v2/city/top", GEO_API_URL);
 
@@ -107,20 +160,20 @@ impl QWeatherClient {
     /// * number 返回结果的数量，取值范围1-20，默认返回10个结果。
     pub async fn geo_poi_lookup(
         &self,
-        location: &str,
-        type_: &str,
-        city: Option<&str>,
-        number: Option<u32>,
+        geo_poi_lookup_input: GeoPoiLookupInput<'_>,
     ) -> APIResult<POIResponse> {
         let url = format!("{}/v2/poi/lookup", GEO_API_URL);
 
         let mut params = self.base_params.clone();
-        params.insert("location".to_string(), location.to_string());
-        params.insert("type".to_string(), type_.to_string());
-        if let Some(city) = city {
+        params.insert(
+            "location".to_string(),
+            geo_poi_lookup_input.location.to_string(),
+        );
+        params.insert("type".to_string(), geo_poi_lookup_input.type_.to_string());
+        if let Some(city) = geo_poi_lookup_input.city {
             params.insert("city".to_string(), city.to_string());
         }
-        if let Some(number) = number {
+        if let Some(number) = geo_poi_lookup_input.number {
             params.insert("number".to_string(), number.to_string());
         }
 
@@ -147,20 +200,20 @@ impl QWeatherClient {
     /// * number 返回结果的数量，取值范围1-20，默认返回10个结果。
     pub async fn geo_poi_range(
         &self,
-        location: &str,
-        type_: &str,
-        radius: Option<f32>,
-        number: Option<u32>,
+        geo_poi_range_input: GeoPoiRangeInput<'_>,
     ) -> APIResult<POIResponse> {
         let url = format!("{}/v2/poi/range", GEO_API_URL);
 
         let mut params = self.base_params.clone();
-        params.insert("location".to_string(), location.to_string());
-        params.insert("type".to_string(), type_.to_string());
-        if let Some(radius) = radius {
+        params.insert(
+            "location".to_string(),
+            geo_poi_range_input.location.to_string(),
+        );
+        params.insert("type".to_string(), geo_poi_range_input.type_.to_string());
+        if let Some(radius) = geo_poi_range_input.radius {
             params.insert("radius".to_string(), radius.to_string());
         }
-        if let Some(number) = number {
+        if let Some(number) = geo_poi_range_input.number {
             params.insert("number".to_string(), number.to_string());
         }
 

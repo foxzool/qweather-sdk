@@ -2,7 +2,7 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
-use crate::{api::decode_datetime, APIResult, client::QWeatherClient};
+use crate::{api::decode_datetime, client::QWeatherClient, APIResult};
 
 /// 实时空气质量(beta)请求参数
 #[derive(Default)]

@@ -22,7 +22,10 @@ pub struct ClientConfig {
     pub public_id: String,
     pub private_key: String,
     pub subscription: bool,
+    /// 多语言设置，请阅读[多语言](https://dev.qweather.com/docs/resource/language/)文档，了解我们的多语言是如何工作、如何设置以及数据是否支持多语言。
     pub lang: Option<String>,
+    /// 数据单位设置，可选值包括unit=m（公制单位，默认）和unit=i（英制单位）。更多选项和说明参考度[量衡单位](https://dev.qweather.com/docs/resource/unit)。
+    pub unit: Option<String>,
 }
 
 impl ClientConfig {
@@ -33,6 +36,7 @@ impl ClientConfig {
             private_key: private_key.to_string(),
             subscription: false,
             lang: None,
+            unit: None,
         }
     }
 }
@@ -92,6 +96,7 @@ impl QWeatherClient {
                 private_key: private_key.to_string(),
                 subscription,
                 lang: Some(lang.to_string()),
+                unit: None,
             },
         }
     }
