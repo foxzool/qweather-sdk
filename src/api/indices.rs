@@ -40,7 +40,7 @@ impl QWeatherClient {
 }
 
 /// 天气指数预报
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DailyIndices {
     /// 预报日期
@@ -61,7 +61,7 @@ pub struct DailyIndices {
 }
 
 /// 天气指数预报返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct IndicesForecastResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)

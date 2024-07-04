@@ -53,7 +53,7 @@ impl QWeatherClient {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherWarning {
     /// 本条预警的唯一标识，可判断本条预警是否已经存在
@@ -93,7 +93,7 @@ pub struct WeatherWarning {
 }
 
 /// 天气灾害预警返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherWarningResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -110,7 +110,7 @@ pub struct WeatherWarningResponse {
 }
 
 /// 天气预警城市列表
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherWarningCityListResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -125,7 +125,7 @@ pub struct WeatherWarningCityListResponse {
 }
 
 /// LocationID
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LocationId {
     pub location_id: String,

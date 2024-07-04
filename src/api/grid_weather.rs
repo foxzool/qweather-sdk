@@ -76,7 +76,7 @@ impl QWeatherClient {
 }
 
 /// 格点实时天气返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GridWeatherNow {
     /// 数据观测时间
@@ -117,7 +117,7 @@ pub struct GridWeatherNow {
     pub dew: Option<f32>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GridWeatherNowResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -132,7 +132,7 @@ pub struct GridWeatherNowResponse {
 }
 
 /// 格点每日天气预报
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GridWeatherDailyForecast {
     /// 预报日期
@@ -183,7 +183,7 @@ pub struct GridWeatherDailyForecast {
 }
 
 /// 格点每日天气预报返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GridWeatherDailyForecastResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -198,7 +198,7 @@ pub struct GridWeatherDailyForecastResponse {
 }
 
 /// 格点逐小时天气预报返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GridWeatherHourlyForecastResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -213,7 +213,7 @@ pub struct GridWeatherHourlyForecastResponse {
 }
 
 /// 格点每日天气预报
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GridWeatherHourlyForecast {
     /// 预报日期

@@ -44,7 +44,7 @@ pub enum APIResponse<T> {
 }
 
 /// 数据来源
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Refer {
     /// 原始数据来源，或数据源说明，可能为空
     pub sources: Vec<String>,

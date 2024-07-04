@@ -32,7 +32,7 @@ impl QWeatherClient {
 }
 
 /// 分钟级降水
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Minutely {
     /// 预报时间
@@ -46,7 +46,7 @@ pub struct Minutely {
     pub type_: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MinutePrecipitationResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)

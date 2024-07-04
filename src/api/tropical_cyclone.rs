@@ -27,7 +27,7 @@ impl QWeatherClient {
 }
 
 /// 台风预报返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct StormForecastResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -44,7 +44,7 @@ pub struct StormForecastResponse {
 }
 
 /// 台风预报
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct StormForecast {
     /// 台风预报时间

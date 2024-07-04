@@ -1,9 +1,10 @@
+use std::collections::BTreeMap;
+
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
-use std::collections::BTreeMap;
 
-use crate::{api::decode_datetime, client::QWeatherClient, APIResult};
+use crate::{api::decode_datetime, APIResult, client::QWeatherClient};
 
 /// 实时空气质量(beta)请求参数
 #[derive(Default)]
@@ -70,7 +71,7 @@ impl QWeatherClient {
 }
 
 /// 实时空气质量返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AirNowResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -89,7 +90,7 @@ pub struct AirNowResponse {
 }
 
 /// 空气质量
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AQI {
     /// [空气质量指数](https://dev.qweather.com/docs/resource/air-info/#supported-aqis)Code
@@ -116,7 +117,7 @@ pub struct AQI {
 }
 
 /// 首要污染物
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PrimaryPollutant {
     /// [首要污染物](https://dev.qweather.com/docs/resource/air-info/#primary-pollutant)的Code，可能为空
@@ -128,7 +129,7 @@ pub struct PrimaryPollutant {
 }
 
 /// 健康指导意见
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Health {
     /// [空气质量对健康的影响](https://dev.qweather.com/docs/resource/air-info/#health-effects-and-advice)，可能为空
@@ -138,7 +139,7 @@ pub struct Health {
 }
 
 /// 健康指导意见
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HealthAdvice {
     /// 对一般人群的健康指导意见，可能为空
@@ -148,7 +149,7 @@ pub struct HealthAdvice {
 }
 
 /// 污染物
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Pollutant {
     /// [污染物](https://dev.qweather.com/docs/resource/air-info/#pollutants)的Code，可能为空
@@ -164,7 +165,7 @@ pub struct Pollutant {
 }
 
 /// 浓度值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Concentration {
     /// 浓度值
@@ -175,7 +176,7 @@ pub struct Concentration {
 }
 
 /// 分指数
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SubIndex {
     /// [污染物的分指数的数值](https://dev.qweather.com/docs/resource/air-info/#pollutant-sub-index)，可能为空
@@ -186,7 +187,7 @@ pub struct SubIndex {
 }
 
 /// AQI相关联的监测站
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Station {
     /// AQI相关联的监测站Location ID，可能为空
@@ -196,7 +197,7 @@ pub struct Station {
 }
 
 /// 监测站数据返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AirStationResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)

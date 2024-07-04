@@ -86,7 +86,7 @@ impl QWeatherClient {
 }
 
 /// 实时天气返回值`
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherNow {
     /// 数据观测时间
@@ -134,7 +134,7 @@ pub struct WeatherNow {
 }
 
 /// 实时天气返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherNowResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -151,7 +151,7 @@ pub struct WeatherNowResponse {
 }
 
 /// 每日天气预报
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DailyForecast {
     /// 预报日期
@@ -223,7 +223,7 @@ pub struct DailyForecast {
 }
 
 /// 每日天气预报返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherDailyForecastResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -240,7 +240,7 @@ pub struct WeatherDailyForecastResponse {
 }
 
 /// 逐小时天气预报
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HourlyForecast {
     /// 预报时间
@@ -281,7 +281,7 @@ pub struct HourlyForecast {
 }
 
 /// 逐小时天气预报返回数据
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherHourlyForecastResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)

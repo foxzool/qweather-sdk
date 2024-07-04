@@ -223,7 +223,7 @@ impl QWeatherClient {
 }
 
 /// 地点信息
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
     /// 地区/城市名称
@@ -259,7 +259,7 @@ pub struct Location {
 }
 
 /// 城市搜索返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CityLookupResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -269,7 +269,7 @@ pub struct CityLookupResponse {
 }
 
 /// 热门城市查询返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TopCityResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
@@ -282,7 +282,7 @@ pub struct TopCityResponse {
 pub type POI = Location;
 
 /// POI搜索返回值
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct POIResponse {
     /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
