@@ -11,7 +11,7 @@ async fn main() {
     let id = env::var("QWEATHER_ID").unwrap();
     let key = env::var("QWEATHER_KEY").unwrap();
 
-    let client = QWeatherClient::new(id, key, false);
+    let mut client = QWeatherClient::new(id, key, false, "zh");
     let resp = client.air_station("P53763").await.unwrap();
     println!("{:#?}", resp);
 }

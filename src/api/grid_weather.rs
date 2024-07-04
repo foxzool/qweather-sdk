@@ -4,8 +4,8 @@ use serde_aux::prelude::*;
 
 use crate::{
     api::{decode_datetime, deserialize_option_number_from_empty_string, Refer},
-    client::QWeatherClient,
     APIResult,
+    client::QWeatherClient,
 };
 
 impl QWeatherClient {
@@ -19,7 +19,7 @@ impl QWeatherClient {
     /// * location (必选)需要查询地区的以英文逗号分隔的经度,纬度坐标（十进制，
     ///   最多支持小数点后两位）。例如 location=116.41,39.92
     pub async fn grid_weather_now(&self, location: &str) -> APIResult<GridWeatherNowResponse> {
-        let url = format!("{}/v7/grid-weather/now", self.base_url);
+        let url = format!("{}/v7/grid-weather/now", self.get_api_host());
 
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());
@@ -43,7 +43,7 @@ impl QWeatherClient {
         location: &str,
         day: i32,
     ) -> APIResult<GridWeatherDailyForecastResponse> {
-        let url = format!("{}/v7/grid-weather/{}d", self.base_url, day);
+        let url = format!("{}/v7/grid-weather/{}d", self.get_api_host(), day);
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());
 
@@ -66,7 +66,7 @@ impl QWeatherClient {
         location: &str,
         hour: i32,
     ) -> APIResult<GridWeatherHourlyForecastResponse> {
-        let url = format!("{}/v7/grid-weather/{}h", self.base_url, hour);
+        let url = format!("{}/v7/grid-weather/{}h", self.get_api_host(), hour);
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());
 

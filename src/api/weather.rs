@@ -20,7 +20,7 @@ impl QWeatherClient {
     ///   最多支持小数点后两位），LocationID可通过GeoAPI获取。例如 location=101010100 或
     ///   location=116.41,39.92
     pub async fn weather_now(&self, location: &str) -> APIResult<WeatherNowResponse> {
-        let url = format!("{}/v7/weather/now", self.base_url);
+        let url = format!("{}/v7/weather/now", self.get_api_host());
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());
 
@@ -48,7 +48,7 @@ impl QWeatherClient {
         if ![3u8, 7, 10, 15, 30].contains(&day) {
             panic!("invalid day")
         }
-        let url = format!("{}/v7/weather/{}d", self.base_url, day);
+        let url = format!("{}/v7/weather/{}d", self.get_api_host(), day);
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());
 
@@ -75,7 +75,7 @@ impl QWeatherClient {
         if ![24u8, 72, 168].contains(&hour) {
             panic!("invalid hour")
         }
-        let url = format!("{}/v7/weather/{}h", self.base_url, hour);
+        let url = format!("{}/v7/weather/{}h", self.get_api_host(), hour);
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());
 

@@ -28,7 +28,7 @@ impl QWeatherClient {
         type_: &str,
         day: i32,
     ) -> APIResult<IndicesForecastResponse> {
-        let url = format!("{}/v7/indices/{}d", self.base_url, day);
+        let url = format!("{}/v7/indices/{}d", self.get_api_host(), day);
 
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location.to_string());

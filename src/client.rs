@@ -9,18 +9,66 @@ use crate::{api::APIResponse, WEATHER_API_URL, WEATHER_DEV_API_URL};
 
 /// QWeatherClient
 pub struct QWeatherClient {
-    pub(crate) base_url: String,
+    api_host: String,
     pub(crate) client: Client,
-    pub(crate) lang: Option<String>,
-    pub(crate) unit: Option<String>,
     /// 基础查询参数
     pub(crate) base_params: BTreeMap<String, String>,
     private_key: String,
+    client_config: ClientConfig,
+}
+
+/// api 客户端配置
+pub struct ClientConfig {
+    pub public_id: String,
+    pub private_key: String,
+    pub subscription: bool,
+    pub lang: Option<String>,
+}
+
+impl ClientConfig {
+    /// 创建新的配置
+    pub fn new(public_id: impl ToString, private_key: impl ToString) -> Self {
+        ClientConfig {
+            public_id: public_id.to_string(),
+            private_key: private_key.to_string(),
+            subscription: false,
+            lang: None,
+        }
+    }
 }
 
 impl QWeatherClient {
-    pub fn new(public_id: impl ToString, private_key: impl ToString, subscription: bool) -> Self {
-        let base_url = if subscription {
+    pub fn with_config(client_config: ClientConfig) -> Self {
+        let api_host = if client_config.subscription {
+            WEATHER_API_URL.to_string()
+        } else {
+            WEATHER_DEV_API_URL.to_string()
+        };
+
+        let client = ClientBuilder::new()
+            .gzip(true)
+            .build()
+            .expect("Failed to create reqwest client");
+
+        let mut base_params = BTreeMap::new();
+        base_params.insert("publicid".to_string(), client_config.public_id.to_string());
+
+        QWeatherClient {
+            api_host,
+            client,
+            base_params,
+            private_key: client_config.private_key.to_string(),
+            client_config,
+        }
+    }
+
+    pub fn new(
+        public_id: impl ToString,
+        private_key: impl ToString,
+        subscription: bool,
+        lang: impl ToString,
+    ) -> Self {
+        let api_host = if subscription {
             WEATHER_API_URL.to_string()
         } else {
             WEATHER_DEV_API_URL.to_string()
@@ -35,27 +83,22 @@ impl QWeatherClient {
         base_params.insert("publicid".to_string(), public_id.to_string());
 
         QWeatherClient {
-            base_url,
+            api_host,
             client,
-            lang: None,
-            unit: None,
             base_params,
             private_key: private_key.to_string(),
+            client_config: ClientConfig {
+                public_id: public_id.to_string(),
+                private_key: private_key.to_string(),
+                subscription,
+                lang: Some(lang.to_string()),
+            },
         }
     }
 
-    pub fn set_lang(&mut self, lang: impl ToString) -> &mut Self {
-        self.lang = Some(lang.to_string());
-        self.base_params
-            .insert("lang".to_string(), lang.to_string());
-        self
-    }
-
-    pub fn set_unit(&mut self, unit: impl ToString) -> &mut Self {
-        self.unit = Some(unit.to_string());
-        self.base_params
-            .insert("unit".to_string(), unit.to_string());
-        self
+    /// 获取API Host
+    pub fn get_api_host(&self) -> &str {
+        &self.api_host
     }
 
     /// 请求API

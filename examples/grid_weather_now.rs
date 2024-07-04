@@ -9,7 +9,7 @@ async fn main() {
     let id = env::var("QWEATHER_ID").unwrap();
     let key = env::var("QWEATHER_KEY").unwrap();
 
-    let client = QWeatherClient::new(id, key, false);
+    let client = QWeatherClient::new(id, key, false, "zh");
     let resp = client.grid_weather_now("116.41,39.92").await.unwrap();
     println!("{:#?}", resp);
 }

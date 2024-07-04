@@ -2,7 +2,7 @@
 name = "qweather-sdk"
 version = "0.2.0"
 edition = "2021"
-license = "Apache-2.0 OR MIT"
+license = "Apache-2.0"
 authors = ["ZoOL <zhooul@gmail.com>"]
 readme = "README.md"
 description = "Client SDK to use QWeather API"

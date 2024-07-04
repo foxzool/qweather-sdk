@@ -2,7 +2,20 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
-use crate::{api::decode_datetime, client::QWeatherClient, APIResult};
+use crate::{api::decode_datetime, APIResult, client::QWeatherClient};
+
+/// 实时空气质量(beta)请求参数
+#[derive(Default)]
+pub struct AirNowInput<'a> {
+    /// (必选)所需查询城市的LocationID，LocationID可通过GeoAPI获取。例如 101010100
+    pub location: &'a str,
+    /// 返回空气质量中的污染物数值，布尔值，默认false。
+    pub pollutant: Option<bool>,
+    /// 返回当前城市AQI所参考的监测站ID和名字，布尔值，默认false。
+    pub station: Option<bool>,
+    /// 多语言设置，请阅读多语言文档，了解我们的多语言是如何工作、如何设置以及数据是否支持多语言。
+    pub lang: Option<&'a str>,
+}
 
 impl QWeatherClient {
     /// 实时空气质量(beta)
@@ -15,17 +28,22 @@ impl QWeatherClient {
     /// * location 所需查询城市的LocationID，LocationID可通过GeoAPI获取。例如 101010100
     /// * pollutant 返回空气质量中的污染物数值，布尔值，默认false。
     /// * station 返回当前城市AQI所参考的监测站ID和名字，布尔值，默认false。
-    pub async fn air_now(
-        &self,
-        location: &str,
-        pollutant: bool,
-        station: bool,
-    ) -> APIResult<AirNowResponse> {
-        let url = format!("{}/airquality/v1/now/{}", self.base_url, location);
+    pub async fn air_now(&self, air_now_input: AirNowInput<'_>) -> APIResult<AirNowResponse> {
+        let url = format!(
+            "{}/airquality/v1/now/{}",
+            self.get_api_host(),
+            air_now_input.location
+        );
         let mut params = self.base_params.clone();
-        params.insert("location".to_string(), location.to_string());
-        params.insert("pollutant".to_string(), pollutant.to_string());
-        params.insert("station".to_string(), station.to_string());
+        params.insert("location".to_string(), air_now_input.location.to_string());
+        params.insert(
+            "pollutant".to_string(),
+            air_now_input.pollutant.unwrap_or_default().to_string(),
+        );
+        params.insert(
+            "station".to_string(),
+            air_now_input.station.unwrap_or_default().to_string(),
+        );
 
         self.request_api(url, params).await
     }
@@ -38,7 +56,11 @@ impl QWeatherClient {
     ///
     /// * location 空气质量监测站的LocationID，LocationID可通过GeoAPI获取。例如 P58911
     pub async fn air_station(&self, location_id: &str) -> APIResult<AirStationResponse> {
-        let url = format!("{}/airquality/v1/station/{}", self.base_url, location_id);
+        let url = format!(
+            "{}/airquality/v1/station/{}",
+            self.get_api_host(),
+            location_id
+        );
         let mut params = self.base_params.clone();
         params.insert("location".to_string(), location_id.to_string());
 
