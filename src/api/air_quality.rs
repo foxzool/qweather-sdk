@@ -533,7 +533,7 @@ fn test_air_station() {
     );
     let pollutant = air_station.pollutant;
     assert_eq!(pollutant.len(), 5);
-    assert_eq!(air_station.source.len(), 1);
+    assert_eq!(air_station.source.unwrap().len(), 1);
     assert_eq!(pollutant[0].code, "pm2p5");
     assert_eq!(pollutant[0].name, "PM 2.5");
     assert_eq!(pollutant[0].full_name, "Fine particulate matter (<2.5µm)");
