@@ -10,6 +10,7 @@ pub mod grid_weather;
 pub mod indices;
 pub mod minutely;
 pub mod tropical_cyclone;
+pub mod utils;
 pub mod warning;
 pub mod weather;
 

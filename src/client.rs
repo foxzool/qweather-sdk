@@ -131,6 +131,7 @@ impl QWeatherClient {
         let body: Value = response.json().await?;
         let code = body["code"].as_str().unwrap();
         if code == "200" {
+            log::trace!("Response: {}", serde_json::to_string_pretty(&body).unwrap());
             match serde_json::from_value::<T>(body) {
                 Ok(response) => Ok(APIResponse::Success(response)),
                 Err(e) => {

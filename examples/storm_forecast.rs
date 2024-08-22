@@ -4,6 +4,7 @@ use dotenvy::dotenv;
 
 use qweather_sdk::client::{ClientConfig, QWeatherClient};
 
+/// 付费内容
 #[tokio::main]
 async fn main() {
     dotenv().expect(".env file not found");

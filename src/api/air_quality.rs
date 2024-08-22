@@ -4,7 +4,8 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
-use crate::{api::decode_datetime, APIResult, client::QWeatherClient};
+use crate::api::utils::RGBA;
+use crate::{api::decode_datetime, client::QWeatherClient, APIResult};
 
 /// 实时空气质量(beta)请求参数
 #[derive(Default)]
@@ -109,7 +110,7 @@ pub struct AQI {
     /// 空气质量指数类别，可能为空
     pub category: String,
     /// 空气质量指数的颜色，RGB格式
-    pub color: String,
+    pub color: RGBA,
     /// 首要污染物
     pub primary_pollutant: Option<PrimaryPollutant>,
     /// 健康指导意见
@@ -208,7 +209,7 @@ pub struct AirStationResponse {
     /// 污染物
     pub pollutant: Vec<Pollutant>,
     /// 数据来源
-    pub source: Vec<String>,
+    pub source: Option<Vec<String>>,
 }
 
 #[test]
@@ -242,7 +243,12 @@ fn test_air_quality() {
       "valueDisplay": "55",
       "level": "2",
       "category": "良",
-      "color": "255,255,0",
+      "color": {
+          "alpha": 255,
+          "blue": 0,
+          "green": 255,
+          "red": 255
+        },
       "primaryPollutant": {
         "code": "pm10",
         "name": "PM 10",
@@ -437,7 +443,7 @@ fn test_air_quality() {
     assert_eq!(air_now.aqi[0].value_display, "37");
     assert_eq!(air_now.aqi[0].level, 1);
     assert_eq!(air_now.aqi[0].category, "优");
-    assert_eq!(air_now.aqi[0].color, "0,228,0");
+    assert_eq!(air_now.aqi[0].color.red, 255);
     assert_eq!(
         air_now.aqi[0].health.as_ref().unwrap().effect,
         "空气质量令人满意，基本无空气污染。"
