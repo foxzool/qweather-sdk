@@ -226,7 +226,12 @@ fn test_air_quality() {
       "valueDisplay": "37",
       "level": "1",
       "category": "优",
-      "color": "0,228,0",
+      "color": {
+          "alpha": 255,
+          "blue": 0,
+          "green": 228,
+          "red": 0
+        },
       "health": {
         "effect": "空气质量令人满意，基本无空气污染。",
         "advice": {
@@ -443,7 +448,7 @@ fn test_air_quality() {
     assert_eq!(air_now.aqi[0].value_display, "37");
     assert_eq!(air_now.aqi[0].level, 1);
     assert_eq!(air_now.aqi[0].category, "优");
-    assert_eq!(air_now.aqi[0].color.red, 255);
+    assert_eq!(air_now.aqi[0].color.green, 228);
     assert_eq!(
         air_now.aqi[0].health.as_ref().unwrap().effect,
         "空气质量令人满意，基本无空气污染。"
