@@ -206,7 +206,6 @@ pub struct AirStationResponse {
     pub metadata: MetaData,
     /// 污染物
     pub pollutants: Vec<Pollutant>,
-
 }
 
 #[test]
@@ -540,7 +539,10 @@ fn test_air_station() {
     let air_station: AirStationResponse = serde_json::from_str(json_data).unwrap();
     let metadata = air_station.metadata;
     assert_eq!(metadata.sources.len(), 1);
-    assert_eq!(metadata.tag, "f5306fd35a92320f12995584ac41178d299e0431fc6568387fd0b00dd2b581a0");
+    assert_eq!(
+        metadata.tag,
+        "f5306fd35a92320f12995584ac41178d299e0431fc6568387fd0b00dd2b581a0"
+    );
     let pollutant = air_station.pollutants;
     assert_eq!(pollutant.len(), 6);
     assert_eq!(pollutant[0].code, "pm2p5");
