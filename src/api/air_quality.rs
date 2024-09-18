@@ -1,11 +1,12 @@
+use crate::api::decode_datetime;
 use std::collections::BTreeMap;
 
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
-use crate::api::utils::RGBA;
-use crate::{api::decode_datetime, client::QWeatherClient, APIResult};
+use crate::api::utils::{MetaData, RGBA};
+use crate::{client::QWeatherClient, APIResult};
 
 /// 实时空气质量(beta)请求参数
 #[derive(Default)]
@@ -201,15 +202,11 @@ pub struct Station {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AirStationResponse {
-    /// 请参考[状态码](https://dev.qweather.com/docs/resource/status-code/)
-    pub code: String,
-    /// 当前[API的最近更新时间](https://dev.qweather.com/docs/resource/glossary/#update-time)
-    #[serde(deserialize_with = "decode_datetime")]
-    pub update_time: DateTime<FixedOffset>,
-    /// 污染物
-    pub pollutant: Vec<Pollutant>,
     /// 数据来源
-    pub source: Option<Vec<String>>,
+    pub metadata: MetaData,
+    /// 污染物
+    pub pollutants: Vec<Pollutant>,
+
 }
 
 #[test]
@@ -476,72 +473,79 @@ fn test_air_quality() {
 #[test]
 fn test_air_station() {
     let json_data = r#"{
-  "code": "200",
-  "updateTime": "2023-08-30T09:40+00:00",
-  "pollutant": [
+  "metadata": {
+    "sources": [
+      "中国环境监测总站 (CNEMC)。数据仅为当天参考值，未经过完整的审核程序进行修订和确认，不适用评价达标状况或任何正式评估。"
+    ],
+    "tag": "f5306fd35a92320f12995584ac41178d299e0431fc6568387fd0b00dd2b581a0"
+  },
+  "pollutants": [
     {
       "code": "pm2p5",
-      "name": "PM 2.5",
-      "fullName": "Fine particulate matter (<2.5µm)",
       "concentration": {
-        "value": "19",
-        "unit": "μg/m3"
-      }
+        "unit": "μg/m3",
+        "value": 12.0
+      },
+      "fullName": "颗粒物（粒径小于等于2.5µm）",
+      "name": "PM 2.5"
     },
     {
       "code": "pm10",
-      "name": "PM 10",
-      "fullName": "Inhalable particulate matter (<10µm)",
       "concentration": {
-        "value": "26",
-        "unit": "μg/m3"
-      }
+        "unit": "μg/m3",
+        "value": 20.0
+      },
+      "fullName": "颗粒物（粒径小于等于10µm）",
+      "name": "PM 10"
     },
     {
       "code": "no2",
-      "name": "NO2",
-      "fullName": "Nitrogen dioxide",
       "concentration": {
-        "value": "12.3",
-        "unit": "ppb"
-      }
+        "unit": "μg/m3",
+        "value": 11.0
+      },
+      "fullName": "二氧化氮",
+      "name": "NO2"
     },
     {
       "code": "o3",
-      "name": "O3",
-      "fullName": "Ozone",
       "concentration": {
-        "value": "30",
-        "unit": "ppb"
-      }
+        "unit": "μg/m3",
+        "value": 50.0
+      },
+      "fullName": "臭氧",
+      "name": "O3"
+    },
+    {
+      "code": "so2",
+      "concentration": {
+        "unit": "μg/m3",
+        "value": 7.0
+      },
+      "fullName": "二氧化硫",
+      "name": "SO2"
     },
     {
       "code": "co",
-      "name": "CO",
-      "fullName": "Carbon monoxide",
       "concentration": {
-        "value": "0.4",
-        "unit": "ppm"
-      }
+        "unit": "mg/m3",
+        "value": 0.4
+      },
+      "fullName": "一氧化碳",
+      "name": "CO"
     }
-  ],
-  "source": [
-    "EPA"
   ]
 }"#;
 
     let air_station: AirStationResponse = serde_json::from_str(json_data).unwrap();
-    assert_eq!(air_station.code, "200");
-    assert_eq!(
-        air_station.update_time.to_string(),
-        "2023-08-30 09:40:00 +00:00"
-    );
-    let pollutant = air_station.pollutant;
-    assert_eq!(pollutant.len(), 5);
-    assert_eq!(air_station.source.unwrap().len(), 1);
+    let metadata = air_station.metadata;
+    assert_eq!(metadata.sources.len(), 1);
+    assert_eq!(metadata.tag, "f5306fd35a92320f12995584ac41178d299e0431fc6568387fd0b00dd2b581a0");
+    let pollutant = air_station.pollutants;
+    assert_eq!(pollutant.len(), 6);
     assert_eq!(pollutant[0].code, "pm2p5");
     assert_eq!(pollutant[0].name, "PM 2.5");
-    assert_eq!(pollutant[0].full_name, "Fine particulate matter (<2.5µm)");
-    assert_eq!(pollutant[0].concentration.value, 19.0);
+    assert_eq!(pollutant[0].full_name, "颗粒物（粒径小于等于2.5µm）");
+    assert_eq!(pollutant[0].concentration.value, 12.0);
     assert_eq!(pollutant[0].concentration.unit, "μg/m3");
 }

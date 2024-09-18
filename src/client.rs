@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-
 use md5::{Digest, Md5};
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
@@ -127,20 +126,26 @@ impl QWeatherClient {
         );
         let sign = self.sign_params(&params);
         params.insert("sign".to_string(), sign);
-        let response = self.client.get(&url).query(&params).send().await?;
-        let body: Value = response.json().await?;
-        let code = body["code"].as_str().unwrap();
-        if code == "200" {
-            log::trace!("Response: {}", serde_json::to_string_pretty(&body).unwrap());
-            match serde_json::from_value::<T>(body) {
-                Ok(response) => Ok(APIResponse::Success(response)),
-                Err(e) => {
-                    log::error!("Failed to parse response: {}", e);
-                    Ok(APIResponse::Error("Failed to parse response".to_string()))
+        match self.client.get(&url).query(&params).send().await {
+            Ok(response) => {
+                let body: Value = response.json().await?;
+                match body["code"].as_str() {
+                    Some("200") | None => {
+                        match serde_json::from_value::<T>(body) {
+                            Ok(response) => Ok(APIResponse::Success(response)),
+                            Err(e) => {
+                                log::error!("Failed to parse response: {}", e);
+                                Ok(APIResponse::Error("Failed to parse response".to_string()))
+                            }
+                        }
+                    }
+                    // v1 error
+                    Some(code) => Ok(APIResponse::Error(code.to_string())),
                 }
             }
-        } else {
-            Ok(APIResponse::Error(code.to_string()))
+            Err(error) => {
+                Ok(APIResponse::Error(error.to_string()))
+            }
         }
     }
 

@@ -8,6 +8,13 @@
 
 ## Example
 
+在项目下创建`.env`文件，内容如下：
+
+```env
+QWEATHER_ID=your_id
+QWEATHER_KEY=your_key 
+```
+
 ```no_run
 use std::env;
 
