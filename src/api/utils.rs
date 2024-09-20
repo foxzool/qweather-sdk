@@ -15,5 +15,5 @@ pub struct MetaData {
     /// 数据标签
     pub tag: String,
     /// 数据来源或提供商名字以及他们的声明，开发者必须将此内容与当前数据一起展示，可能为空
-    pub sources: Vec<String>,
+    pub sources: Option<Vec<String>>,
 }

@@ -1,9 +1,9 @@
+use crate::{api::APIResponse, WEATHER_API_URL, WEATHER_DEV_API_URL};
+use log::trace;
 use md5::{Digest, Md5};
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 use std::collections::BTreeMap;
-
-use crate::{api::APIResponse, WEATHER_API_URL, WEATHER_DEV_API_URL};
 
 /// 天气API客户端
 pub struct QWeatherClient {
@@ -37,7 +37,7 @@ impl ClientConfig {
             public_id: public_id.to_string(),
             private_key: private_key.to_string(),
             subscription: false,
-            lang: None,
+            lang: Some("zh".to_string()),
             unit: None,
         }
     }
@@ -59,6 +59,9 @@ impl QWeatherClient {
 
         let mut base_params = BTreeMap::new();
         base_params.insert("publicid".to_string(), client_config.public_id.to_string());
+        if let Some(lang) = &client_config.lang {
+            base_params.insert("lang".to_string(), lang.to_string());
+        }
 
         QWeatherClient {
             api_host,
@@ -129,6 +132,7 @@ impl QWeatherClient {
         match self.client.get(&url).query(&params).send().await {
             Ok(response) => {
                 let body: Value = response.json().await?;
+                trace!("Response: {:?}", body);
                 match body["code"].as_str() {
                     Some("200") | None => match serde_json::from_value::<T>(body) {
                         Ok(response) => Ok(APIResponse::Success(response)),
