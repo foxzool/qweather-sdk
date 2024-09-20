@@ -53,7 +53,7 @@ impl QWeatherClient {
     ///
     /// # Examples
     ///
-    /// ``` norun, rust
+    /// ``` ignore, rust
     ///    let id = env::var("QWEATHER_ID").unwrap();
     ///     let key = env::var("QWEATHER_KEY").unwrap();
     ///     let client_config = ClientConfig::new(id, key);
@@ -94,8 +94,8 @@ impl QWeatherClient {
     ///
     /// # Examples
     ///
-    /// ``` norun, rust
-    ///    let id = env::var("QWEATHER_ID").unwrap();
+    /// ``` ignore, rust
+    ///     let id = env::var("QWEATHER_ID").unwrap();
     ///     let key = env::var("QWEATHER_KEY").unwrap();
     ///     let client_config = ClientConfig::new(id, key);
     ///     let client = QWeatherClient::with_config(client_config);
