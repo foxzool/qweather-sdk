@@ -55,11 +55,11 @@ impl QWeatherClient {
     ///
     /// ``` norun, rust
     ///    let id = env::var("QWEATHER_ID").unwrap();
-    //     let key = env::var("QWEATHER_KEY").unwrap();
-    //     let client_config = ClientConfig::new(id, key);
-    //     let client = QWeatherClient::with_config(client_config);
-    //
-    //     let resp = client.air_hourly_forecast(39.90, 116.40).await.unwrap();
+    ///     let key = env::var("QWEATHER_KEY").unwrap();
+    ///     let client_config = ClientConfig::new(id, key);
+    ///     let client = QWeatherClient::with_config(client_config);
+    ///
+    ///     let resp = client.air_hourly_forecast(39.90, 116.40).await.unwrap();
     /// ```
     pub async fn air_hourly_forecast(
         &self,
@@ -68,6 +68,47 @@ impl QWeatherClient {
     ) -> APIResult<AirHourlyForecastResponse> {
         let url = format!(
             "{}/airquality/v1/hourly/{}/{}",
+            self.get_api_host(),
+            latitude,
+            longitude
+        );
+        let mut params = BTreeMap::new();
+        params.insert("latitude".to_string(), latitude.to_string());
+        params.insert("longitude".to_string(), longitude.to_string());
+
+        self.request_api(url, params).await
+    }
+
+    /// 空气质量每日预报(new)
+    ///
+    /// 空气质量每日预报API提供未来3天的空气质量（AQI）预报、污染物浓度值和健康建议。
+    ///
+    /// 我们推荐阅读空气质量信息文档，以便了解AQI的类型、污染物、支持的国家等信息。
+    ///
+    /// # Arguments
+    ///
+    /// * `latitude`: (必选)所需位置的纬度。十进制，最多支持小数点后两位。例如 39.92
+    /// * `longitude`: (必选)所需位置的经度。十进制，最多支持小数点后两位。例如 116.41
+    ///
+    /// returns: Result<APIResponse<AirHourlyForecastResponse>, Error>
+    ///
+    /// # Examples
+    ///
+    /// ``` norun, rust
+    ///    let id = env::var("QWEATHER_ID").unwrap();
+    ///     let key = env::var("QWEATHER_KEY").unwrap();
+    ///     let client_config = ClientConfig::new(id, key);
+    ///     let client = QWeatherClient::with_config(client_config);
+    ///
+    ///     let resp = client.air_daily_forecast(39.90, 116.40).await.unwrap();
+    /// ```
+    pub async fn air_daily_forecast(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> APIResult<AirDailyForecastResponse> {
+        let url = format!(
+            "{}/airquality/v1/daily/{}/{}",
             self.get_api_host(),
             latitude,
             longitude
@@ -113,7 +154,7 @@ pub struct AirCurrentResponse {
     // pub stations: Option<Vec<Station>>,
 }
 
-/// 空气质量小时预报(new)返回值
+/// 空气质量小时预报(new) 返回值
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AirHourlyForecastResponse {
@@ -128,10 +169,34 @@ pub struct HourlyForecastResponse {
     /// 预报时间，ISO8601格式
     #[serde(deserialize_with = "decode_iso6801")]
     pub forecast_time: DateTime<Utc>,
-    // /// 空气质量指数
+    /// 空气质量指数
     pub indexes: Vec<AQI>,
-    // // /// 污染物
-    // pub pollutants: Option<Vec<Pollutant>>,
+    /// 污染物
+    pub pollutants: Option<Vec<Pollutant>>,
+}
+
+/// 空气质量每日预报(new) 返回值
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AirDailyForecastResponse {
+    /// 数据来源
+    pub metadata: MetaData,
+    pub days: Vec<DailyForecastResponse>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DailyForecastResponse {
+    /// 预报数据的开始时间，ISO8601格式
+    #[serde(deserialize_with = "decode_iso6801")]
+    pub forecast_start_time: DateTime<Utc>,
+    /// 预报数据的结束时间，ISO8601格式
+    #[serde(deserialize_with = "decode_iso6801")]
+    pub forecast_end_time: DateTime<Utc>,
+    /// 空气质量指数
+    pub indexes: Vec<AQI>,
+    /// 污染物
+    pub pollutants: Option<Vec<Pollutant>>,
 }
 
 /// 空气质量
