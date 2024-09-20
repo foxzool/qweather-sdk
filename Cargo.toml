@@ -97,3 +97,7 @@ path = "examples/storm_forecast.rs"
 [[example]]
 name = "air_current"
 path = "examples/air-quality/air_current.rs"
+
+[[example]]
+name = "air_hourly_forecast"
+path = "examples/air-quality/air_hourly_forecast.rs"

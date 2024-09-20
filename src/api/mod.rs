@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, Utc};
 use serde::{de::Error, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
@@ -19,8 +19,33 @@ where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
+    println!("s = {:?}", s);
     let dt = DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
+    println!("dt = {:?}", dt);
     Ok(dt)
+}
+
+pub fn decode_iso6801<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let iso8601_str = String::deserialize(deserializer)?;
+    let complete_date_str = if iso8601_str.ends_with('Z') {
+        format!("{}:00Z", &iso8601_str[..iso8601_str.len() - 1])
+    } else {
+        iso8601_str.to_string()
+    };
+
+    match DateTime::parse_from_rfc3339(&complete_date_str) {
+        Ok(datetime) => {
+            let datetime_utc = datetime.with_timezone(&Utc);
+            Ok(datetime_utc)
+        }
+        Err(e) => {
+            eprintln!("Failed to parse ISO 8601 string: {}", e);
+            Err(D::Error::custom(e.to_string()))
+        }
+    }
 }
 
 pub fn option_decode_datetime<'de, D>(
