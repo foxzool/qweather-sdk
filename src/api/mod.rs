@@ -19,9 +19,9 @@ where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    println!("s = {:?}", s);
+    // println!("s = {:?}", s);
     let dt = DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
-    println!("dt = {:?}", dt);
+    // println!("dt = {:?}", dt);
     Ok(dt)
 }
 
