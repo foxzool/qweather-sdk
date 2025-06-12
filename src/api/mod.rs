@@ -14,40 +14,41 @@ pub mod utils;
 pub mod warning;
 pub mod weather;
 
+/// 解码带时区的日期时间格式
 pub fn decode_datetime<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    // println!("s = {:?}", s);
-    let dt = DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
-    // println!("dt = {:?}", dt);
-    Ok(dt)
+    DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z")
+        .map_err(|e| Error::custom(format!("Failed to parse datetime '{}': {}", s, e)))
 }
 
-pub fn decode_iso6801<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+/// 解码ISO 8601格式的UTC日期时间
+pub fn decode_iso8601<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
 where
     D: Deserializer<'de>,
 {
     let iso8601_str = String::deserialize(deserializer)?;
+
+    // 处理缺少秒数的情况
     let complete_date_str = if iso8601_str.ends_with('Z') {
         format!("{}:00Z", &iso8601_str[..iso8601_str.len() - 1])
     } else {
-        iso8601_str.to_string()
+        iso8601_str.clone()
     };
 
-    match DateTime::parse_from_rfc3339(&complete_date_str) {
-        Ok(datetime) => {
-            let datetime_utc = datetime.with_timezone(&Utc);
-            Ok(datetime_utc)
-        }
-        Err(e) => {
-            eprintln!("Failed to parse ISO 8601 string: {}", e);
-            Err(D::Error::custom(e.to_string()))
-        }
-    }
+    DateTime::parse_from_rfc3339(&complete_date_str)
+        .map(|datetime| datetime.with_timezone(&Utc))
+        .map_err(|e| {
+            Error::custom(format!(
+                "Failed to parse ISO 8601 string '{}': {}",
+                iso8601_str, e
+            ))
+        })
 }
 
+/// 解码可选的日期时间，空字符串返回None
 pub fn option_decode_datetime<'de, D>(
     deserializer: D,
 ) -> Result<Option<DateTime<FixedOffset>>, D::Error>
@@ -58,26 +59,62 @@ where
     if s.is_empty() {
         Ok(None)
     } else {
-        let dt = DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z").unwrap();
-        Ok(Some(dt))
+        DateTime::<FixedOffset>::parse_from_str(&s, "%Y-%m-%dT%H:%M%z")
+            .map(Some)
+            .map_err(|e| Error::custom(format!("Failed to parse datetime '{}': {}", s, e)))
     }
 }
-/// API响应
-#[derive(Debug)]
+
+/// API响应封装类型
+#[derive(Debug, Clone, PartialEq)]
 pub enum APIResponse<T> {
+    /// 成功响应
     Success(T),
+    /// 错误响应
     Error(String),
 }
 
-/// 数据来源
-#[derive(Deserialize, Serialize, Debug, Clone)]
+impl<T> APIResponse<T> {
+    /// 检查是否为成功响应
+    pub fn is_success(&self) -> bool {
+        matches!(self, APIResponse::Success(_))
+    }
+
+    /// 检查是否为错误响应
+    pub fn is_error(&self) -> bool {
+        matches!(self, APIResponse::Error(_))
+    }
+
+    /// 获取成功响应的值，如果是错误则panic
+    pub fn unwrap(self) -> T {
+        match self {
+            APIResponse::Success(value) => value,
+            APIResponse::Error(err) => panic!("Called unwrap on Error: {}", err),
+        }
+    }
+
+    /// 获取成功响应的值，如果是错误则返回默认值
+    pub fn unwrap_or(self, default: T) -> T {
+        match self {
+            APIResponse::Success(value) => value,
+            APIResponse::Error(_) => default,
+        }
+    }
+}
+
+/// 数据来源信息
+#[derive(Deserialize, Serialize, Debug, Clone, Default, PartialEq)]
 pub struct Refer {
     /// 原始数据来源，或数据源说明，可能为空
+    #[serde(default)]
     pub sources: Vec<String>,
     /// 数据许可或版权声明，可能为空
+    #[serde(default)]
     pub license: Vec<String>,
 }
 
+/// 从空字符串或null值反序列化为Option<T>
+/// 支持多种输入格式：空字符串、null、数值字符串、直接数值
 pub fn deserialize_option_number_from_empty_string<'de, T, D>(
     deserializer: D,
 ) -> Result<Option<T>, D::Error>
@@ -96,18 +133,57 @@ where
     }
 
     match NumericOrNull::<T>::deserialize(deserializer)? {
-        NumericOrNull::Str(s) => match s {
-            "" => Ok(None),
-            _ => T::from_str(s).map(Some).map_err(Error::custom),
-        },
-        NumericOrNull::FromStr(i) => Ok(Some(i)),
+        NumericOrNull::Str(s) => {
+            if s.is_empty() {
+                Ok(None)
+            } else {
+                T::from_str(s)
+                    .map(Some)
+                    .map_err(|e| Error::custom(format!("Failed to parse '{}': {}", s, e)))
+            }
+        }
+        NumericOrNull::FromStr(value) => Ok(Some(value)),
         NumericOrNull::Null => Ok(None),
         NumericOrNull::SerdeString(value) => match value {
-            Value::String(s) => match s.as_str() {
-                "" => Ok(None),
-                _ => T::from_str(s.as_str()).map(Some).map_err(Error::custom),
-            },
-            _ => Err(Error::custom(value)),
+            Value::String(s) => {
+                if s.is_empty() {
+                    Ok(None)
+                } else {
+                    T::from_str(&s)
+                        .map(Some)
+                        .map_err(|e| Error::custom(format!("Failed to parse '{}': {}", s, e)))
+                }
+            }
+            Value::Null => Ok(None),
+            _ => Err(Error::custom(format!(
+                "Expected string or null, got: {}",
+                value
+            ))),
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_api_response() {
+        let success: APIResponse<i32> = APIResponse::Success(42);
+        assert!(success.is_success());
+        assert!(!success.is_error());
+        assert_eq!(success.unwrap(), 42);
+
+        let error: APIResponse<i32> = APIResponse::Error("test error".to_string());
+        assert!(!error.is_success());
+        assert!(error.is_error());
+        assert_eq!(error.unwrap_or(0), 0);
+    }
+
+    #[test]
+    fn test_refer_default() {
+        let refer = Refer::default();
+        assert!(refer.sources.is_empty());
+        assert!(refer.license.is_empty());
     }
 }

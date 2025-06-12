@@ -1,4 +1,4 @@
-use crate::api::decode_iso6801;
+use crate::api::decode_iso8601;
 use crate::api::utils::{MetaData, RGBA};
 use crate::{client::QWeatherClient, APIResult};
 use chrono::{DateTime, Utc};
@@ -167,7 +167,7 @@ pub struct AirHourlyForecastResponse {
 #[serde(rename_all = "camelCase")]
 pub struct HourlyForecastResponse {
     /// 预报时间，ISO8601格式
-    #[serde(deserialize_with = "decode_iso6801")]
+    #[serde(deserialize_with = "decode_iso8601")]
     pub forecast_time: DateTime<Utc>,
     /// 空气质量指数
     pub indexes: Vec<AQI>,
@@ -188,10 +188,10 @@ pub struct AirDailyForecastResponse {
 #[serde(rename_all = "camelCase")]
 pub struct DailyForecastResponse {
     /// 预报数据的开始时间，ISO8601格式
-    #[serde(deserialize_with = "decode_iso6801")]
+    #[serde(deserialize_with = "decode_iso8601")]
     pub forecast_start_time: DateTime<Utc>,
     /// 预报数据的结束时间，ISO8601格式
-    #[serde(deserialize_with = "decode_iso6801")]
+    #[serde(deserialize_with = "decode_iso8601")]
     pub forecast_end_time: DateTime<Utc>,
     /// 空气质量指数
     pub indexes: Vec<AQI>,
